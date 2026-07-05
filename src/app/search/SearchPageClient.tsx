@@ -161,14 +161,14 @@ export default function SearchPageClient({ places, nodes, edges }: SearchPageCli
 
   return (
     <Layout>
-      <div className="flex-1 flex flex-col md:flex-row relative w-full h-[calc(100vh-73px)] overflow-hidden">
+      <div 
+        className="flex-1 flex flex-col md:flex-row relative w-full h-[calc(100vh-73px)] overflow-hidden bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/images/cairo_university_dome.png')" }}
+      >
+        {/* Subtle glassmorphic overlay to make the route card stand out */}
+        <div className="absolute inset-0 bg-black/15 dark:bg-black/35 backdrop-blur-[2px] z-10" />
 
-        {/* Map Background — always visible behind the form */}
-        <div className="flex-1 h-full relative">
-          <CampusMap places={places} />
-        </div>
-
-        {/* Route Setup Floating Card — overlays the map */}
+        {/* Route Setup Floating Card — overlays the background */}
         <div className="absolute inset-0 z-30 flex items-end md:items-center justify-center pointer-events-none p-4 md:p-8">
           <div className="pointer-events-auto w-full max-w-md bg-surface-lowest/95 backdrop-blur-2xl border border-outline-variant/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden">
 
