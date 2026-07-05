@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CU Navigate - Smart Campus Wayfinding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#e51245",
+                        "secondary-fixed-dim": "#aec7f6",
+                        "secondary": "#465f88",
+                        "on-secondary-fixed": "#001b3d",
+                        "tertiary-fixed": "#e2e2e2",
+                        "on-tertiary-container": "#fcfcfc",
+                        "tertiary-container": "#737575",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#454747",
+                        "surface-variant": "#e0e3e6",
+                        "surface-bright": "#f7f9fc",
+                        "on-secondary-fixed-variant": "#2d476f",
+                        "surface-container": "#eceef1",
+                        "secondary-container": "#b6d0ff",
+                        "on-error": "#ffffff",
+                        "tertiary": "#5a5c5c",
+                        "on-tertiary-fixed": "#1a1c1c",
+                        "outline": "#916e6f",
+                        "inverse-primary": "#ffb3b5",
+                        "on-primary-fixed-variant": "#920027",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#40000c",
+                        "surface-tint": "#be0036",
+                        "inverse-surface": "#2d3133",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#ffdada",
+                        "background": "#f7f9fc",
+                        "surface-container-highest": "#e0e3e6",
+                        "surface": "#f7f9fc",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#eff1f4",
+                        "surface-container-low": "#f2f4f7",
+                        "on-surface": "#191c1e",
+                        "on-secondary-container": "#3f5881",
+                        "tertiary-fixed-dim": "#c6c6c7",
+                        "surface-dim": "#d8dadd",
+                        "primary": "#ba0034",
+                        "secondary-fixed": "#d6e3ff",
+                        "on-primary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e6e8eb",
+                        "on-error-container": "#93000a",
+                        "on-background": "#191c1e",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#5d3f40",
+                        "primary-fixed-dim": "#ffb3b5",
+                        "outline-variant": "#e6bcbd"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "safe-area-bottom": "2rem",
+                        "margin-desktop": "2.5rem",
+                        "margin-mobile": "1rem",
+                        "gutter-xs": "0.5rem",
+                        "gutter-md": "1rem"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-md-mobile": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-md-mobile": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.03em", "fontWeight": "600"}],
+                        "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .map-glow {
+            box-shadow: 0 10px 30px rgba(186, 0, 52, 0.15);
+        }
+        .nav-link-active {
+            color: #ba0034;
+            border-bottom: 2px solid #ba0034;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Top Navigation Bar -->
+<header class="bg-surface/85 backdrop-blur-xl border-b border-white/20 shadow-sm sticky top-0 z-50 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4">
+<div class="flex items-center gap-2">
+<span class="text-headline-md font-display-lg font-black text-primary">CU Navigate</span>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-primary font-bold border-b-2 border-primary text-label-md font-label-md py-1" href="#">Directory</a>
+<a class="text-secondary hover:text-primary transition-colors text-label-md font-label-md" href="#">About</a>
+<a class="text-secondary hover:text-primary transition-colors text-label-md font-label-md" href="#">Contact</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary cursor-pointer hover:text-primary transition-colors">account_circle</span>
+<button class="bg-primary hover:bg-primary-container text-white px-6 py-2.5 rounded-full font-label-md text-label-md transition-all active:scale-95">Get Started</button>
+</div>
+</header>
+<main>
+<!-- Hero Section -->
+<section class="relative overflow-hidden pt-12 pb-24 px-margin-mobile md:px-margin-desktop">
+<div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+<div class="z-10 text-center md:text-left">
+<span class="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm mb-6 uppercase tracking-wider">Cairo University Official Wayfinding</span>
+<h1 class="text-display-lg font-display-lg mb-6 leading-tight">Never Get Lost at <span class="text-primary">Cairo University</span> Again</h1>
+<p class="text-body-lg font-body-lg text-secondary mb-10 max-w-xl mx-auto md:mx-0">Find any building, faculty, or landmark in seconds with our high-precision smart campus navigation system.</p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+<button class="bg-primary hover:bg-primary-container text-white px-8 py-4 rounded-full font-headline-sm text-headline-sm transition-all active:scale-95 shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">navigation</span>
+                            Start Navigating
+                        </button>
+<button class="border-2 border-secondary/20 hover:border-primary/50 text-on-surface px-8 py-4 rounded-full font-headline-sm text-headline-sm transition-all flex items-center justify-center gap-2">
+                            Explore Campus
+                        </button>
+</div>
+<div class="mt-12 flex items-center gap-6 justify-center md:justify-start">
+<div class="flex -space-x-3">
+<div class="w-10 h-10 rounded-full border-2 border-white bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A portrait of a smiling Egyptian female college student with a vibrant red hijab and professional academic attire, set against a blurred Cairo University campus background with warm morning sunlight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCP_sjYjUJ9K6ygzIZnbGYbkH3Z2OEg9CVjSVwGh55NBWhK68hkdYZEpscH6qYts5xdtsNkslScWlbSZhrZpju94sZfn_T6s1ovtIpv-H7CAkJZ-ilJrm2zt7fXlVtGCpppHQu4P-K3hyeKwJaH8WTW7_iBzBTvkc-R3IsLS-mPOuHDbLX0yETDn3Fl8A-O22gonid6wET0fB_Qgzax2KEb10_zBxeN212HZISW1jTeAFpRREWevg"/>
+</div>
+<div class="w-10 h-10 rounded-full border-2 border-white bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A close-up portrait of a young male engineering student wearing glasses and a navy blue sweater, holding a tablet with the CU Navigate app open, smiling confidently in front of the Cairo University clock tower." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAr5bCK2bYNMrCijTqfewXi4py2BWl0uo_8JVkPtKo-ywRtom-FyhNZsJHqBiqUGMllKubYXhJqdZkb1STerjirSJSYpDONiNhga_WB0Me0Re8_owi8zsVfrRLLvmaVnY4Y_svDPoKgBOptNYG4nChjz24vzzylAG3GJ0fBIn_pCFO-bSApjTRO5YkY-cFshgxpzUy_COpA6NddGmJnSpmu_qCxVYdig_jEg8CitomgNQLQ4e_57Q"/>
+</div>
+<div class="w-10 h-10 rounded-full border-2 border-white bg-surface-variant overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional portrait of an Egyptian medical student in a white coat, with the iconic architecture of the Cairo University Medical Faculty in the background during a clear, sunny day." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRtx0X1ebltoyLHnIfiVRwFopqsm2EMoAQCPauhakVh2ailfBDKIqCJOLfRtTZHWck6oh1norewn3uxKr38t9kt7I3swWQYMb2S9oXW6oMksgXskqb82HEagz9on2jSAraXvvwL1NJ1stnvyHBNwJYRj6kiiebjUdqF8E12JvdGYVgNs9Czg38gZHG7Ki7wM4f9SfEToPtE9ppiVdO8cyD8Quer-vlsz3GKbefS6tCilh5x9ngIg"/>
+</div>
+</div>
+<p class="text-label-sm font-label-sm text-secondary"><span class="text-on-surface font-bold">15,000+</span> Students using CU Navigate</p>
+</div>
+</div>
+<div class="relative flex justify-center items-center">
+<div class="absolute -z-10 w-[120%] h-[120%] bg-primary/5 blur-[100px] rounded-full"></div>
+<div class="relative w-full max-w-[400px] transform rotate-3 hover:rotate-0 transition-transform duration-700">
+<!-- Phone Mockup -->
+<div class="bg-black p-3 rounded-[3rem] shadow-2xl border-8 border-gray-900 aspect-[9/19] relative overflow-hidden flex flex-col">
+<!-- In-App Interface Content -->
+<div class="bg-white h-full w-full rounded-[2rem] overflow-hidden flex flex-col">
+<!-- Map Background -->
+<div class="absolute inset-0 bg-slate-100 opacity-20 pointer-events-none"></div>
+<div class="relative h-full w-full" data-location="Cairo University Campus" style="">
+<div class="absolute inset-0 w-full h-full" data-alt="A detailed digital map illustration of the Cairo University campus featuring white 3D buildings, green gardens, and the iconic clock tower, with a vibrant electric pink navigation route line highlighting a path between two faculty buildings." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuANUYCOCJOfzin6vCChxZNgJCPvxWpRTheMd-5MdmOXXNhij5E4Pcz0kEPDSDYHI9BTezQTgN4DT6vGcCH6UtweFONAYZB_Q4JOc4riWxH_O8_K_3o81bgEM1EJb57jWjNgCaVvCpmNpGT6Q9fzvfdPfe1NPwUNBJVNSNEYfosYcLQkQIBocG2T2FhjOrFASzTj8_cLOd0t6cUeXmX8J2C0fFu71CFNLBBciHXb3kfTs8DNsUHh8w')"></div>
+<!-- Search Interface Overlay -->
+<div class="absolute top-10 left-0 right-0 px-4">
+<div class="bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-lg border border-gray-100">
+<div class="flex items-center gap-3 bg-surface-container rounded-lg px-3 py-2 mb-2">
+<span class="material-symbols-outlined text-primary text-sm">my_location</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant truncate">Engineering Gate</span>
+</div>
+<div class="flex items-center gap-3 bg-surface-container rounded-lg px-3 py-2 mb-4">
+<span class="material-symbols-outlined text-primary text-sm">location_on</span>
+<span class="text-label-sm font-label-sm text-on-surface">Faculty of Commerce</span>
+</div>
+<button class="w-full bg-primary text-white py-2.5 rounded-xl font-label-md text-label-md">Get Direction</button>
+</div>
+</div>
+<!-- Floating Bottom Indicator -->
+<div class="absolute bottom-6 left-0 right-0 px-4">
+<div class="bg-white rounded-2xl p-4 shadow-xl flex items-center gap-4">
+<div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">directions_walk</span>
+</div>
+<div>
+<p class="text-label-sm font-bold text-on-surface">ETA: 4 Mins</p>
+<p class="text-label-sm text-secondary">350m • Gate 4 Path</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Features Bento Grid -->
+<section class="py-24 bg-surface-container-low px-margin-mobile md:px-margin-desktop">
+<div class="max-w-7xl mx-auto">
+<div class="text-center mb-16">
+<h2 class="text-display-lg font-display-lg mb-4">Designed for the Modern Campus</h2>
+<p class="text-body-lg font-body-lg text-secondary max-w-2xl mx-auto">All the tools you need to master your commute between lectures, libraries, and administrative offices.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Feature 1: Smart Search -->
+<div class="md:col-span-2 glass-card rounded-2xl p-8 shadow-sm flex flex-col md:flex-row gap-8 items-center border border-white">
+<div class="flex-1 order-2 md:order-1 text-center md:text-left">
+<div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-6 mx-auto md:mx-0">
+<span class="material-symbols-outlined text-white">search_insights</span>
+</div>
+<h3 class="text-headline-md font-headline-md mb-4">Instant Smart Search</h3>
+<p class="text-body-md font-body-md text-secondary">Looking for an exam hall or a specific faculty office? Our AI-powered search recognizes building nicknames and room codes used by students.</p>
+</div>
+<div class="flex-1 order-1 md:order-2 w-full">
+<div class="bg-white p-4 rounded-xl shadow-inner border border-outline-variant space-y-3">
+<div class="flex items-center gap-3 p-2 bg-surface-container rounded-lg opacity-40">
+<span class="material-symbols-outlined text-primary text-sm">history</span>
+<span class="text-label-sm font-label-sm">Central Library</span>
+</div>
+<div class="flex items-center gap-3 p-2 bg-primary/5 border border-primary/20 rounded-lg">
+<span class="material-symbols-outlined text-primary text-sm">search</span>
+<span class="text-label-sm font-label-sm">Faculty of Engineering Hall 2...</span>
+</div>
+<div class="flex items-center gap-3 p-2 bg-surface-container rounded-lg opacity-60">
+<span class="material-symbols-outlined text-primary text-sm">star</span>
+<span class="text-label-sm font-label-sm">The Food Court</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Feature 2: GPS -->
+<div class="glass-card rounded-2xl p-8 shadow-sm border border-white flex flex-col h-full">
+<div class="w-12 h-12 bg-secondary rounded-xl flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-white">satellite_alt</span>
+</div>
+<h3 class="text-headline-md font-headline-md mb-4">Precision Indoor/Outdoor GPS</h3>
+<p class="text-body-md font-body-md text-secondary mb-8">Navigation that works through concrete. We've mapped every corridor and courtyard for seamless transitions.</p>
+<div class="mt-auto h-32 bg-slate-100 rounded-xl overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="A top-down stylized architectural drawing of a building floor plan with blue and red lines indicating pathways through rooms and hallways, emphasizing indoor navigation capabilities." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFJWFzonQYGMgQ-V6nvHDQ1-w3eVNur3KTXsfG43eHSDax-Ar9fwTtbvT1IzkvK4C9S5amsFJlTWPnkXRDjCeI0KZn7rSdz8QKSP9hsHvF2T0LtQid6HRguyLN18ndTGjlYYwRT_IWZ9zCbBiIiK6vqr3CbB91iL4XAnPL2q3F76Tst0SvjvtVsvxYj_ay66iUAU_wV2lyFqqwoMMuw-1q59UN7j4-kImQ-F0ieMgomSgOMgYm7A"/>
+<div class="absolute inset-0 bg-gradient-to-t from-white/80 to-transparent"></div>
+</div>
+</div>
+<!-- Feature 3: Building Directory -->
+<div class="glass-card rounded-2xl p-8 shadow-sm border border-white flex flex-col h-full">
+<div class="w-12 h-12 bg-tertiary rounded-xl flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-white">apartment</span>
+</div>
+<h3 class="text-headline-md font-headline-md mb-4">Complete Building Directory</h3>
+<p class="text-body-md font-body-md text-secondary">A digital Rolodex of every department, lecture hall, and administrative desk at Cairo University.</p>
+</div>
+<!-- Feature 4: Live Traffic -->
+<div class="md:col-span-2 glass-card rounded-2xl p-8 shadow-sm border border-white flex flex-col md:flex-row gap-8 items-center">
+<div class="flex-1 w-full relative h-48 bg-gray-100 rounded-xl overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A modern infographic style illustration showing a crowd of people represented by soft, colorful dots moving through a campus gate, visualized with a heatmap effect to show pedestrian density." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtDsAD99hTbXoyQIWdqaoUS93cDN1OWizLOjJuO51prnUO1w4hyd6tX0J8WyR-YlFpHYJ9AXf5HpiKXjI9jjrCTdvk8EhXxl45v-DKaLmgSGSjuoDdGx7uqi_tejrMkxz6Ak16s3nCmezBtZlRPpSc4lbg3xhz5HCMDu7G9diBVzdi0ZnM2BlYJ2vvrTsXxaadpgiXVYDLDdMLbFqY10ffYi6ow37y_BvJ2JiR0d61_-E-92PZcw"/>
+</div>
+<div class="flex-1 text-center md:text-left">
+<h3 class="text-headline-md font-headline-md mb-4">Real-time Crowding</h3>
+<p class="text-body-md font-body-md text-secondary">Avoid congested gates and busy squares. CU Navigate suggests the quietest paths so you're never late for your exam.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- How it Works -->
+<section class="py-24 px-margin-mobile md:px-margin-desktop bg-white">
+<div class="max-w-7xl mx-auto">
+<h2 class="text-display-lg font-display-lg text-center mb-16">Get Moving in 3 Simple Steps</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+<!-- Connector line for desktop -->
+<div class="hidden md:block absolute top-24 left-[15%] right-[15%] h-0.5 bg-dashed border-t-2 border-dashed border-outline-variant z-0"></div>
+<div class="flex flex-col items-center text-center z-10">
+<div class="w-20 h-20 rounded-full bg-primary text-white flex items-center justify-center text-display-lg font-black mb-8 shadow-xl shadow-primary/20">1</div>
+<h3 class="text-headline-md font-headline-md mb-3">Locate</h3>
+<p class="text-body-md font-body-md text-secondary">Enable location services and open the app anywhere on the CU campus grounds.</p>
+</div>
+<div class="flex flex-col items-center text-center z-10">
+<div class="w-20 h-20 rounded-full bg-primary text-white flex items-center justify-center text-display-lg font-black mb-8 shadow-xl shadow-primary/20">2</div>
+<h3 class="text-headline-md font-headline-md mb-3">Search</h3>
+<p class="text-body-md font-body-md text-secondary">Type the building name or code. Use voice search for hands-free convenience.</p>
+</div>
+<div class="flex flex-col items-center text-center z-10">
+<div class="w-20 h-20 rounded-full bg-primary text-white flex items-center justify-center text-display-lg font-black mb-8 shadow-xl shadow-primary/20">3</div>
+<h3 class="text-headline-md font-headline-md mb-3">Follow</h3>
+<p class="text-body-md font-body-md text-secondary">Follow the high-precision route line and audio cues directly to your destination.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Supported Buildings Preview -->
+<section class="py-24 bg-surface-container-highest px-margin-mobile md:px-margin-desktop overflow-hidden">
+<div class="max-w-7xl mx-auto">
+<div class="flex justify-between items-end mb-12">
+<div>
+<h2 class="text-display-lg font-display-lg mb-2">Campus Coverage</h2>
+<p class="text-body-lg font-body-lg text-secondary">Mapping 100% of the main university campus.</p>
+</div>
+<button class="text-primary font-bold flex items-center gap-1 hover:underline">View All Locations <span class="material-symbols-outlined">arrow_right_alt</span></button>
+</div>
+<div class="flex gap-6 overflow-x-auto pb-8 snap-x no-scrollbar">
+<div class="snap-center min-w-[300px] bg-white rounded-2xl overflow-hidden shadow-sm group">
+<div class="h-48 relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A wide-angle professional photograph of the majestic dome and historic architecture of the main administration building at Cairo University, under a bright blue sky." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDStNynxFRJKP27gEfqtwSezsD1HBuZu1ydeIVg70ezm8Hqs6J12zugQ_kXfLpVh85PPg1CYi5Aloot3FnnVyXfs-eN5td43u6r3gx6JHgvt1TAeSzwRLnZSXjl7qL-cHNiWV3taxlzCB2rZdthCKmy28KZzNpEMKusr7lhkPBLBSBjfkebFTYXMywubygzQVTH-VU9o7Mcv7n17VqmoHmaK55WLR_ys_l8my-gecu_AanlT9mDgw"/>
+</div>
+<div class="p-6">
+<h4 class="text-headline-sm font-headline-sm mb-1">Main Administration</h4>
+<p class="text-label-sm font-label-sm text-secondary">Central Landmark • Zone A</p>
+</div>
+</div>
+<div class="snap-center min-w-[300px] bg-white rounded-2xl overflow-hidden shadow-sm group">
+<div class="h-48 relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="The modern architectural facade of the Faculty of Engineering at Cairo University, featuring clean lines, large glass windows, and student activity in the foreground." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCzjLpvvlhrz-fMZi8FNHJ-ZdXQvqoi1SXQZEdNSNjzXH7Pqfm-1KNHSQeu8cMxtWErh24ZV-zvasIaskJZ-tgH7AcV1QS_bLiBzFMxCx7dBkx2qqhFbWHzHXtkKmo2q-azzV0qa9ceu8sz850yqeD3rHOvQoscC_zIMlapo4EUqQ2V3V_hVEkP7kF750R0PBgy3K4ccEldaDxba1Hz7L1XI6HoH963Z-zwYR--WIx8h2a3HLHag"/>
+</div>
+<div class="p-6">
+<h4 class="text-headline-sm font-headline-sm mb-1">Faculty of Engineering</h4>
+<p class="text-label-sm font-label-sm text-secondary">Complex 2 • Giza Main</p>
+</div>
+</div>
+<div class="snap-center min-w-[300px] bg-white rounded-2xl overflow-hidden shadow-sm group">
+<div class="h-48 relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A serene view of the Cairo University Central Library, showing the entrance surrounded by lush palm trees and manicured lawns under the afternoon sun." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKp3XfQZzQ2fDVIMWygl0CH0T0MjQBUjhCF_R60aBwNRNFm1Cjwzl1WUm7OATpdCt0CjSihtQ_tLTphl2u9p3DwlTo3l4X_ifHb7jWpE6pz8nQPrZe-nsvYH78AKLqEghvkSG40hS21tV3dTqpGJlG-98KghQuiJrS8uytV8IVhIvb1jOX6djk0YsMn48PbMm6nX8yyCcDCVdXZyTa_5O_kqlaUKQkZcxZLJQIiSPv6uQ-azXFNw"/>
+</div>
+<div class="p-6">
+<h4 class="text-headline-sm font-headline-sm mb-1">Central Library</h4>
+<p class="text-label-sm font-label-sm text-secondary">Academic Hub • Zone C</p>
+</div>
+</div>
+<div class="snap-center min-w-[300px] bg-white rounded-2xl overflow-hidden shadow-sm group">
+<div class="h-48 relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="The impressive entrance of the Faculty of Medicine at Cairo University, known as Kasr Al-Ainy, showcasing its historic stone pillars and busy entrance area." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkt-N9eCh6kekNhddWzSaE1IOC5qcNfxNuXGXLDgIyHJu_s0W-21Djxc9pFHPlP8zh8dtPZCmPxzSs6ww3JtryJ0pZ7RSQc9ihDsa0IyNQLuHuw4ePyVEXu3G9jg9GH_AtATeYLw_SSJkU1gG2HSEdgKqJNjmeRA9tiSjlUfUHHeYZMTIo7f07QlC-66bapdsyzywxw5RdMrxKb-STJ0Rh4aWIIEQOnnPf3dCQB4_X25gNkI5U1A"/>
+</div>
+<div class="p-6">
+<h4 class="text-headline-sm font-headline-sm mb-1">Faculty of Medicine</h4>
+<p class="text-label-sm font-label-sm text-secondary">Medical Campus • Manyal</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Student Testimonials -->
+<section class="py-24 px-margin-mobile md:px-margin-desktop bg-white">
+<div class="max-w-7xl mx-auto">
+<h2 class="text-display-lg font-display-lg text-center mb-16">Trusted by the CU Community</h2>
+<div class="grid md:grid-cols-3 gap-8">
+<div class="p-8 rounded-2xl bg-surface-container-low border border-outline-variant italic">
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+<img class="w-full h-full object-cover" data-alt="A small avatar of a friendly Egyptian male student with short dark hair and a bright smile, wearing a casual grey polo shirt." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1FaXE-oA5Ltp_v9k2J2B6qAoRUaBHfHY5SO3f2l4t9kAb_vTPDyTt0IvTW53UTMJ9ruJysV8vkzG7NLPOo0IED0tm6r6Cbj0Cc-lgbEUr1Nz9WBuEVTD-eZ_U18MeQb6YKPRIAnPzKIUS8iC0O_kGB2TwdTW29MQdPkUa0Ye9UvFPVf8_5KlMDTQHQjtvswleHVp-mG0R_vgHyLMcq8dak-sS97kWKn9ST2zq-XLNkNrzEy9-hQ"/>
+</div>
+<div>
+<p class="text-label-md font-bold text-on-surface">Ahmed Ragab</p>
+<p class="text-label-sm text-secondary">Faculty of Commerce</p>
+</div>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant">"As a freshman, I spent my first week completely lost. This app was a life-saver for finding my exam halls in the main building. Accurate and fast."</p>
+</div>
+<div class="p-8 rounded-2xl bg-primary/5 border border-primary/10 italic">
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+<img class="w-full h-full object-cover" data-alt="A small avatar of an Egyptian female student wearing a stylish beige headscarf and a professional blazer, looking confident." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKD1lnTO3f2iCHLUP1xwh9kMaoeKdGIZn0Miq8YEqFT88YHknx1x4mtsLQkUypp63pBqFjqycyIWpdCM8kwlo0PaAIDQSYxdoWFfRWKlq9Y8VtjEs5b0iQUDabvBvp_81tzh0w-oq2qJMs3iRwaLgAMsmGlZTvRv7jLfoJWOon1rsxKnCtW3Y-Kcn5-sV7t5DVnYkj_cM0-WujJSQ8tILq20hKelNHOfEsvnwMez_APSb8NY3HKw"/>
+</div>
+<div>
+<p class="text-label-md font-bold text-on-surface">Sarah Khalil</p>
+<p class="text-label-sm text-secondary">Faculty of Arts</p>
+</div>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant">"The 'quiet route' feature is amazing. I can get from the lecture hall to the library without going through the crowded main square."</p>
+</div>
+<div class="p-8 rounded-2xl bg-surface-container-low border border-outline-variant italic">
+<div class="flex items-center gap-4 mb-6">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
+<img class="w-full h-full object-cover" data-alt="A small avatar of an international student with dark features, wearing a red hoodie and a friendly expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmxIOkItI8mmH8RpvmnOipKcVVHD_PT9de0IDNCeAmKOyceiE5Uw-0HpWu-4enZjC0hTXbDomjKX77LT2cP-qt60yFN0nk3Dy-lllTsazDcszRDjcafvg_qTr8dGuvNBU-OCXS4ua0dpVKablubjx1Zb2jP1clpMJjx52xWpWIROkUexnwtsRFP_cERi5Rr7Pd9ppR9KYS_333nOXi6QF_2S5c1qMY3CGoA4WOAcNtz7jM63nP3g"/>
+</div>
+<div>
+<p class="text-label-md font-bold text-on-surface">Youssef Ali</p>
+<p class="text-label-sm text-secondary">Faculty of Law</p>
+</div>
+</div>
+<p class="text-body-md font-body-md text-on-surface-variant">"The directory search is so detailed. It even found the specific administrative office I needed for my documents. No more asking for directions!"</p>
+</div>
+</div>
+</div>
+</section>
+<!-- FAQ -->
+<section class="py-24 bg-surface-container-low px-margin-mobile md:px-margin-desktop">
+<div class="max-w-3xl mx-auto">
+<h2 class="text-display-lg font-display-lg text-center mb-12">Frequently Asked Questions</h2>
+<div class="space-y-4">
+<details class="group glass-card rounded-2xl border border-white" open="">
+<summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+<span class="text-headline-sm font-headline-sm">How accurate is the location tracking?</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-6 pb-6 text-body-md font-body-md text-secondary">
+                            CU Navigate uses a hybrid location system combining GPS, Wi-Fi fingerprinting, and campus-wide beacons to provide accuracy within 2 meters, even inside large faculty buildings.
+                        </div>
+</details>
+<details class="group glass-card rounded-2xl border border-white">
+<summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+<span class="text-headline-sm font-headline-sm">Do I need an internet connection?</span>
+<summary class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</summary>
+</summary>
+<div class="px-6 pb-6 text-body-md font-body-md text-secondary">
+                            While navigation works best online, you can download the full campus map for offline use. Search and routing will still function perfectly without data.
+                        </div>
+</details>
+<details class="group glass-card rounded-2xl border border-white">
+<summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+<span class="text-headline-sm font-headline-sm">Is my privacy protected?</span>
+<summary class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</summary>
+</summary>
+<div class="px-6 pb-6 text-body-md font-body-md text-secondary">
+                            Absolutely. Your location data is processed locally on your device and is never stored on our servers. We only collect anonymous telemetry to improve campus routing.
+                        </div>
+</details>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="py-24 px-margin-mobile md:px-margin-desktop bg-primary text-white text-center">
+<div class="max-w-4xl mx-auto">
+<h2 class="text-display-lg font-display-lg mb-8">Ready to Master Your Campus?</h2>
+<p class="text-body-lg font-body-lg mb-12 opacity-90">Join thousands of students and faculty members who never worry about getting lost again. Download CU Navigate today.</p>
+<div class="flex flex-col sm:flex-row gap-6 justify-center">
+<button class="bg-white text-primary px-8 py-4 rounded-full font-headline-sm text-headline-sm flex items-center justify-center gap-3 hover:bg-white/90 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                        Get on Android
+                    </button>
+<button class="bg-black text-white px-8 py-4 rounded-full font-headline-sm text-headline-sm flex items-center justify-center gap-3 hover:bg-black/90 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">apps</span>
+                        Get on iOS
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-inverse-surface w-full py-12 px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-6 border-t border-outline-variant">
+<div class="flex flex-col gap-4 text-center md:text-left">
+<span class="text-headline-sm font-headline-sm text-primary">CU Navigate</span>
+<p class="text-body-md font-body-md text-on-surface-variant max-w-xs">Smart Campus Wayfinding for Cairo University's students and visitors.</p>
+<p class="text-label-sm font-label-sm text-on-surface-variant opacity-70">© 2024 Cairo University. All rights reserved.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-x-8 gap-y-4">
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Campus Map API</a>
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Support</a>
+</div>
+<div class="flex gap-4">
+<div class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center hover:bg-primary hover:text-white transition-all cursor-pointer">
+<span class="material-symbols-outlined">face_nod</span>
+</div>
+<div class="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center hover:bg-primary hover:text-white transition-all cursor-pointer">
+<span class="material-symbols-outlined">alternate_email</span>
+</div>
+</div>
+</footer>
+<!-- Mobile Navigation Bottom Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-3 pb-safe md:hidden bg-white/85 backdrop-blur-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)] rounded-t-[24px]">
+<div class="flex flex-col items-center justify-center text-primary scale-110">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="text-label-sm font-label-sm">Explore</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary opacity-60">
+<span class="material-symbols-outlined">history</span>
+<span class="text-label-sm font-label-sm">Recent</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary opacity-60">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="text-label-sm font-label-sm">Add</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary opacity-60">
+<span class="material-symbols-outlined">domain</span>
+<span class="text-label-sm font-label-sm">Campus</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary opacity-60">
+<span class="material-symbols-outlined">person</span>
+<span class="text-label-sm font-label-sm">Profile</span>
+</div>
+</nav>
+<script>
+        // Simple scroll reveal animations
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.glass-card').forEach(el => {
+            el.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-10');
+            observer.observe(el);
+        });
+    </script>
+</body></html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>CU Navigate - Campus Directory</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#e51245",
+                        "secondary-fixed-dim": "#aec7f6",
+                        "secondary": "#465f88",
+                        "on-secondary-fixed": "#001b3d",
+                        "tertiary-fixed": "#e2e2e2",
+                        "on-tertiary-container": "#fcfcfc",
+                        "tertiary-container": "#737575",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#454747",
+                        "surface-variant": "#e0e3e6",
+                        "surface-bright": "#f7f9fc",
+                        "on-secondary-fixed-variant": "#2d476f",
+                        "surface-container": "#eceef1",
+                        "secondary-container": "#b6d0ff",
+                        "on-error": "#ffffff",
+                        "tertiary": "#5a5c5c",
+                        "on-tertiary-fixed": "#1a1c1c",
+                        "outline": "#916e6f",
+                        "inverse-primary": "#ffb3b5",
+                        "on-primary-fixed-variant": "#920027",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#40000c",
+                        "surface-tint": "#be0036",
+                        "inverse-surface": "#2d3133",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#ffdada",
+                        "background": "#f7f9fc",
+                        "surface-container-highest": "#e0e3e6",
+                        "surface": "#f7f9fc",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#eff1f4",
+                        "surface-container-low": "#f2f4f7",
+                        "on-surface": "#191c1e",
+                        "on-secondary-container": "#3f5881",
+                        "tertiary-fixed-dim": "#c6c6c7",
+                        "surface-dim": "#d8dadd",
+                        "primary": "#ba0034",
+                        "secondary-fixed": "#d6e3ff",
+                        "on-primary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e6e8eb",
+                        "on-error-container": "#93000a",
+                        "on-background": "#191c1e",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#5d3f40",
+                        "primary-fixed-dim": "#ffb3b5",
+                        "outline-variant": "#e6bcbd"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "safe-area-bottom": "2rem",
+                        "margin-desktop": "2.5rem",
+                        "margin-mobile": "1rem",
+                        "gutter-xs": "0.5rem",
+                        "gutter-md": "1rem"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-md-mobile": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-md-mobile": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.03em", "fontWeight": "600"}],
+                        "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fc;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .thumb-nav-active {
+            color: #ba0034;
+            transform: scale(1.1);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- Top Navigation Bar -->
+<header class="bg-surface/85 backdrop-blur-xl border-b border-white/20 shadow-sm sticky top-0 z-50 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4">
+<div class="flex items-center gap-8">
+<span class="text-headline-md font-display-lg font-black text-primary">CU Navigate</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-primary font-bold border-b-2 border-primary text-label-md font-label-md" href="#">Directory</a>
+<a class="text-secondary hover:text-primary transition-colors text-label-md font-label-md" href="#">About</a>
+<a class="text-secondary hover:text-primary transition-colors text-label-md font-label-md" href="#">Contact</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="hidden md:block bg-primary text-on-primary px-6 py-2 rounded-full font-bold hover:opacity-90 active:scale-95 transition-all">Get Started</button>
+<span class="material-symbols-outlined text-secondary-container bg-surface-container-high p-2 rounded-full cursor-pointer" data-icon="account_circle">account_circle</span>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-8 pb-32">
+<!-- Header Content -->
+<div class="mb-10">
+<h1 class="text-display-lg font-display-lg mb-2">Campus Directory</h1>
+<p class="text-body-lg text-secondary mb-8">Navigate through Cairo University's historic and modern facilities.</p>
+<!-- Search & Filter Section -->
+<div class="flex flex-col gap-6">
+<!-- Search Bar -->
+<div class="relative max-w-2xl">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary" data-icon="search">search</span>
+<input class="w-full pl-12 pr-4 py-4 glass-card rounded-2xl shadow-sm border-none focus:ring-2 focus:ring-primary-container outline-none text-body-md" placeholder="Search buildings, offices, or facilities..." type="text"/>
+</div>
+<!-- Filter Chips -->
+<div class="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2">
+<button class="whitespace-nowrap px-6 py-2 bg-primary text-on-primary rounded-full text-label-md font-label-md shadow-md">All Facilities</button>
+<button class="whitespace-nowrap px-6 py-2 bg-white text-secondary rounded-full text-label-md font-label-md hover:bg-primary-fixed-dim transition-colors shadow-sm">Faculties</button>
+<button class="whitespace-nowrap px-6 py-2 bg-white text-secondary rounded-full text-label-md font-label-md hover:bg-primary-fixed-dim transition-colors shadow-sm">Libraries</button>
+<button class="whitespace-nowrap px-6 py-2 bg-white text-secondary rounded-full text-label-md font-label-md hover:bg-primary-fixed-dim transition-colors shadow-sm">Admin</button>
+<button class="whitespace-nowrap px-6 py-2 bg-white text-secondary rounded-full text-label-md font-label-md hover:bg-primary-fixed-dim transition-colors shadow-sm">Food</button>
+<button class="whitespace-nowrap px-6 py-2 bg-white text-secondary rounded-full text-label-md font-label-md hover:bg-primary-fixed-dim transition-colors shadow-sm">Services</button>
+</div>
+</div>
+</div>
+<!-- Directory Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Building Card 1 -->
+<div class="glass-card rounded-[24px] p-4 flex flex-col gap-4 shadow-[0_10px_30px_rgba(0,0,0,0.08)] group hover:-translate-y-1 transition-all duration-300">
+<div class="relative h-48 w-full rounded-2xl overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A modern architectural photography of a historic university faculty building at Cairo University, featuring grand stone arches and lush green palm trees. The sky is a clear, brilliant blue, and the lighting is bright midday sun, highlighting the intricate textures of the heritage facade. The style is professional architectural photography with high-end color grading." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCx5A6yn97YAPCtSRAhQMKXqY18lUFjdIFq3baYX8u69D2DHUHxW5N4rdSNzuMpPLNp2SJFDDaFfF6d1tINe7_B58mk-2cN0KEG0bKm_x0DIoQRtANR7CEy6G0RxidROoSLvMqS2MLDACLZ0LAgGzcB_7COzVc5AOYIlWiJ-UZTju_kpyzLODAw7Z4UTTj7scP4I5aSoh6Ybzbvjct-kBhBi6cCzOPLehGZaUe1r3ql97__vda2Lw"/>
+<div class="absolute top-3 left-3 bg-primary-container/90 text-on-primary-container px-3 py-1 rounded-full text-label-sm font-label-sm backdrop-blur-md">Faculty</div>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">Faculty of Engineering</h3>
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on">location_on</span>
+<span class="text-label-md">0.4 km from you</span>
+</div>
+</div>
+<button class="mt-2 w-full py-3 bg-secondary-fixed text-on-secondary-fixed rounded-xl font-bold flex items-center justify-center gap-2 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="directions">directions</span>
+                    Get Directions
+                </button>
+</div>
+<!-- Building Card 2 -->
+<div class="glass-card rounded-[24px] p-4 flex flex-col gap-4 shadow-[0_10px_30px_rgba(0,0,0,0.08)] group hover:-translate-y-1 transition-all duration-300">
+<div class="relative h-48 w-full rounded-2xl overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A grand interior shot of a university central library with high ceilings, vast bookshelves filled with antique books, and modern study carrels. Soft, warm natural light spills in through high arched windows. The atmosphere is quiet, studious, and elegant, blending historic wood accents with clean, modern glass partitions. High-end interior design photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZ7jjYyBYg6He2fWujW2p9jE6sF89t66jeooNrwzw09YCikI2vDRAm8qYysB4KOOGMRYQ12EbLYgVivz_rL46EUhnm3XzdthCagP8YnqX9ZKrUluIU1HGI9w8mFAh75ZCaU2glaMmnJEuuSwgRS9wER655G1rYg6WRHY3WWnR4n9he_K9uMckGcbWWosgin8qh_vUyYIDBOCJnFSbBYfVgszkCkZ2wji09FGOGVtewmFqI2O4Baw"/>
+<div class="absolute top-3 left-3 bg-secondary/90 text-white px-3 py-1 rounded-full text-label-sm font-label-sm backdrop-blur-md">Library</div>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">Central Library</h3>
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on">location_on</span>
+<span class="text-label-md">0.8 km from you</span>
+</div>
+</div>
+<button class="mt-2 w-full py-3 bg-secondary-fixed text-on-secondary-fixed rounded-xl font-bold flex items-center justify-center gap-2 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="directions">directions</span>
+                    Get Directions
+                </button>
+</div>
+<!-- Building Card 3 -->
+<div class="glass-card rounded-[24px] p-4 flex flex-col gap-4 shadow-[0_10px_30px_rgba(0,0,0,0.08)] group hover:-translate-y-1 transition-all duration-300">
+<div class="relative h-48 w-full rounded-2xl overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A modern university administrative building with large glass windows and steel structures. The foreground shows a manicured lawn with students walking on stone paths. The lighting is golden hour, casting long, soft shadows and a warm glow over the scene. The mood is professional, efficient, and inviting. Minimalist corporate campus aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD126jUHasm7XqSM8u2DAYmCkby0Y3pO1lRTtAoMWeR5Yhpjp5_6qEkUc_wv2gX2AW6GUtGlWBC5eXihDHJxP9BBgZ6VftY9Rl5r6yRyaaNyBKMOi0N-LGIHnQEVbd_ijxYCjx3zsXnpzsWomZmwyb6ohNbegvzI9zjRFmvyFB3Bo1D6u1lvaSUhlHCjZEt0xkQKllPcWm7t9_AUngqERpsIN8C8w_4Ndxwds_ZyaIk_lKyAgH_Gw"/>
+<div class="absolute top-3 left-3 bg-tertiary-container/90 text-on-tertiary-container px-3 py-1 rounded-full text-label-sm font-label-sm backdrop-blur-md">Admin</div>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">Main Administration</h3>
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on">location_on</span>
+<span class="text-label-md">1.2 km from you</span>
+</div>
+</div>
+<button class="mt-2 w-full py-3 bg-secondary-fixed text-on-secondary-fixed rounded-xl font-bold flex items-center justify-center gap-2 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="directions">directions</span>
+                    Get Directions
+                </button>
+</div>
+<!-- Building Card 4 -->
+<div class="glass-card rounded-[24px] p-4 flex flex-col gap-4 shadow-[0_10px_30px_rgba(0,0,0,0.08)] group hover:-translate-y-1 transition-all duration-300">
+<div class="relative h-48 w-full rounded-2xl overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A trendy, vibrant campus food court with indoor and outdoor seating. Minimalist furniture, pop-up cafe stands, and greenery create a lively social space. The lighting is bright and cheerful, with colorful accents that match a modern university brand. The style is upbeat, lifestyle photography, focused on community and student life." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBxucxic8O2jiRGgNmiadeAbajvWIpcnEnnerFI344QT9lhzq3ynvUMsDIBsuGoHeXajyJ-B_USX0805ar4UhJ1Uum9kcLmnav-aEoyAD1YwbZA4Jn1_7x1LG2EHO4XnB3GfT9J7f2VKayjVYluY-D4VMnccmzncVBCENql-R5lFJLikybocNbyLGHNSK1cMnOflc3a3g2kABQSrNY0n1r92hYhN5cmFBfPjgIvIRAbatayRNU9A"/>
+<div class="absolute top-3 left-3 bg-primary/90 text-white px-3 py-1 rounded-full text-label-sm font-label-sm backdrop-blur-md">Food</div>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">Student Food Plaza</h3>
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on">location_on</span>
+<span class="text-label-md">0.2 km from you</span>
+</div>
+</div>
+<button class="mt-2 w-full py-3 bg-secondary-fixed text-on-secondary-fixed rounded-xl font-bold flex items-center justify-center gap-2 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="directions">directions</span>
+                    Get Directions
+                </button>
+</div>
+<!-- Building Card 5 -->
+<div class="glass-card rounded-[24px] p-4 flex flex-col gap-4 shadow-[0_10px_30px_rgba(0,0,0,0.08)] group hover:-translate-y-1 transition-all duration-300">
+<div class="relative h-48 w-full rounded-2xl overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A sleek university health clinic or service center. Clean white walls, glass doors, and ergonomic seating. The lighting is cool, bright, and clinical yet welcoming. A small digital kiosk is visible at the entrance. The design is modern, professional, and trustworthy, with subtle blue and grey accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_79EMv6HzEeZdoTtwdZvsjbYhkRWqlFn9dYhUOFmJamXxzLE6A2PTGLKt6VuQNab4NwYk5VEhvAffpjHvoFEdPB54uSNhPN984FdGtJkMmu5qIl5K6nDJt-9wl1ACdXTXrTrQevT0XSYyktKikzKxR5vuT1KUk0cGSvfXVnlkTuT8kgXP4YPPTuLQtvB2ZrABhWgg9hO-aUIQtdEEKDtIVX4AFESaWFQrUsk2PIpn2J089z2zyg"/>
+<div class="absolute top-3 left-3 bg-secondary-container/90 text-on-secondary-container px-3 py-1 rounded-full text-label-sm font-label-sm backdrop-blur-md">Services</div>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">Campus Clinic</h3>
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on">location_on</span>
+<span class="text-label-md">1.5 km from you</span>
+</div>
+</div>
+<button class="mt-2 w-full py-3 bg-secondary-fixed text-on-secondary-fixed rounded-xl font-bold flex items-center justify-center gap-2 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="directions">directions</span>
+                    Get Directions
+                </button>
+</div>
+<!-- Building Card 6 -->
+<div class="glass-card rounded-[24px] p-4 flex flex-col gap-4 shadow-[0_10px_30px_rgba(0,0,0,0.08)] group hover:-translate-y-1 transition-all duration-300">
+<div class="relative h-48 w-full rounded-2xl overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="The grand iconic dome of Cairo University at sunrise. The morning light paints the historic stone in warm oranges and pinks. Students are walking across the vast plaza in the foreground. The photography is cinematic and grand, emphasizing the scale and legacy of the institution. Premium university branding style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC03sXgH0Fi9v4WjRNA5mcrKE35nRcAPpyoo-Hz-qpEdSN142OVYzpFaU7j8S5D0Q6CKJgPyMov4ZhKxPLKvk3vMuhcwjOkAusyjAdGn0OyHtrgyDpgYghe7eqeTuhH56ouSCS3ctQx4w4seUa8hlt6oeDmYEgxg0tmnW15dTAsnPB36gpOd_KQMLprjpcS7tvjtdcoe5tWEmNaVLj2tMr-T0wO_0h89X4GybalRiBZXk6gXmK3Wg"/>
+<div class="absolute top-3 left-3 bg-primary-container/90 text-on-primary-container px-3 py-1 rounded-full text-label-sm font-label-sm backdrop-blur-md">Landmark</div>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">The Grand Dome</h3>
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on">location_on</span>
+<span class="text-label-md">0.5 km from you</span>
+</div>
+</div>
+<button class="mt-2 w-full py-3 bg-secondary-fixed text-on-secondary-fixed rounded-xl font-bold flex items-center justify-center gap-2 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="directions">directions</span>
+                    Get Directions
+                </button>
+</div>
+<!-- Building Card 7 -->
+<div class="glass-card rounded-[24px] p-4 flex flex-col gap-4 shadow-[0_10px_30px_rgba(0,0,0,0.08)] group hover:-translate-y-1 transition-all duration-300">
+<div class="relative h-48 w-full rounded-2xl overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A modern university sports complex with a blue running track and bright red bleachers. The lighting is crisp afternoon sun, creating high-contrast shadows. The style is energetic and athletic, emphasizing fitness and campus wellness. Clear, vibrant colors in a professional sports photography style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHiRUp2UnCXlE0n8Ack0A5yvyeRkTv6v1XDxjbwv7QVsx0-vQE7VjYKm-2Z7FYHRQXA58SMA0cWC6N3AMgClDnXjNu4wpgqTwlB41H2IJyTZ6ylR5ZNS7DlYafW_HpAnMPsexhE6SU0r91qr_Uq-ljPalPaEBPsLya1GcGQXLpztcyJ5y-1sUfrh4jj9lFoo-AHKQC1VkcIkC2U1Z_GS5E3QvpYXzuqFQmtSqr0xbY59ASrHH8nw"/>
+<div class="absolute top-3 left-3 bg-secondary-container/90 text-on-secondary-container px-3 py-1 rounded-full text-label-sm font-label-sm backdrop-blur-md">Services</div>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">University Stadium</h3>
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on">location_on</span>
+<span class="text-label-md">2.1 km from you</span>
+</div>
+</div>
+<button class="mt-2 w-full py-3 bg-secondary-fixed text-on-secondary-fixed rounded-xl font-bold flex items-center justify-center gap-2 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="directions">directions</span>
+                    Get Directions
+                </button>
+</div>
+<!-- Building Card 8 -->
+<div class="glass-card rounded-[24px] p-4 flex flex-col gap-4 shadow-[0_10px_30px_rgba(0,0,0,0.08)] group hover:-translate-y-1 transition-all duration-300">
+<div class="relative h-48 w-full rounded-2xl overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Modern facade of the Faculty of Science building with abstract metallic patterns. The sunlight reflects off the polished surfaces, creating a futuristic look. In the foreground, students are gathered around a digital installation. The mood is innovative and scientific. High-end modern architecture photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLhip-LxVZ9uRYOXt_vWGx3r09Xa761aQQPdytuVYYqSrAqU_AdywiFgMivFMUGD-04ns4S7ClnuRkZkBbYm_CNeNa_bzFUUv-4yWnkCd8BnURTRhffxC0rrpsXh8ZuF0M8g9SwlY5-_jyycgts6sDUZR9ebjBFgsRhQaV3lgg0FYXuSP14HrZMJl7d2O41pGj8BtZok36k5Ji7z0fuNHMsYLUx6vaGwC7dK6MjVrkRmAzvoRuJQ"/>
+<div class="absolute top-3 left-3 bg-primary-container/90 text-on-primary-container px-3 py-1 rounded-full text-label-sm font-label-sm backdrop-blur-md">Faculty</div>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">Faculty of Science</h3>
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="location_on">location_on</span>
+<span class="text-label-md">0.7 km from you</span>
+</div>
+</div>
+<button class="mt-2 w-full py-3 bg-secondary-fixed text-on-secondary-fixed rounded-xl font-bold flex items-center justify-center gap-2 group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="directions">directions</span>
+                    Get Directions
+                </button>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Bar (Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-3 pb-safe-area-bottom md:hidden bg-white/85 backdrop-blur-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)] rounded-t-[24px]">
+<div class="flex flex-col items-center justify-center text-secondary opacity-60 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="text-label-sm font-label-sm">Explore</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary opacity-60 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="text-label-sm font-label-sm">Recent</span>
+</div>
+<div class="flex flex-col items-center justify-center text-primary scale-110">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+<span class="text-label-sm font-label-sm">Campus</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary opacity-60 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="text-label-sm font-label-sm">Add</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary opacity-60 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-label-sm font-label-sm">Profile</span>
+</div>
+</nav>
+<!-- Footer (Desktop) -->
+<footer class="w-full py-12 px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-6 bg-surface-container-highest border-t border-outline-variant">
+<div class="flex flex-col gap-2 text-center md:text-left">
+<span class="text-headline-sm font-headline-sm text-primary">CU Navigate</span>
+<p class="text-label-sm font-label-sm text-on-surface-variant">© 2024 Cairo University. Smart Campus Wayfinding.</p>
+</div>
+<div class="flex gap-6 items-center flex-wrap justify-center">
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Campus Map API</a>
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Support</a>
+</div>
+</footer>
+<script>
+        // Simple Interaction logic for filter chips
+        const chips = document.querySelectorAll('button.whitespace-nowrap');
+        chips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                chips.forEach(c => {
+                    c.classList.remove('bg-primary', 'text-on-primary', 'shadow-md');
+                    c.classList.add('bg-white', 'text-secondary', 'shadow-sm');
+                });
+                chip.classList.remove('bg-white', 'text-secondary', 'shadow-sm');
+                chip.classList.add('bg-primary', 'text-on-primary', 'shadow-md');
+            });
+        });
+
+        // Search bar micro-interaction
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('ring-2', 'ring-primary-container');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('ring-2', 'ring-primary-container');
+        });
+    </script>
+</body></html>

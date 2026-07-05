@@ -1,0 +1,67 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Faculty {
+  id            String   @id
+  nameEn        String
+  nameAr        String
+  descriptionEn String?
+  descriptionAr String?
+  latitude      Float
+  longitude     Float
+  places        Place[]
+}
+
+model Place {
+  id            String   @id
+  nameEn        String
+  nameAr        String
+  displayNameAr String?
+  aliases       String?  // Comma-separated list of search aliases
+  descriptionEn String?
+  descriptionAr String?
+  type          String   // e.g., "FACULTY_BUILDING", "LECTURE_HALL", "OFFICE", "LABORATORY", "SERVICE", "GATE", "LANDMARK"
+  latitude      Float
+  longitude     Float
+  floor         Int?     // null if outdoor, or floor number (0 = Ground, 1 = First, etc.)
+  roomNumber    String?
+  facultyId     String?
+  buildingId    String?  // References another Place representing the parent building
+  faculty       Faculty? @relation(fields: [facultyId], references: [id])
+  building      Place?   @relation("BuildingRooms", fields: [buildingId], references: [id], onDelete: Cascade)
+  indoorPlaces  Place[]  @relation("BuildingRooms")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model NavigationNode {
+  id            String   @id
+  name          String?  // Description of the waypoint (e.g. "Intersection A")
+  latitude      Float
+  longitude     Float
+  floor         Int?     // For indoor routing (null for main roads)
+  edges         NavigationEdge[] @relation("NodeEdges")
+  targetEdges   NavigationEdge[] @relation("NodeTargetEdges")
+}
+
+model NavigationEdge {
+  id            String   @id
+  sourceId      String
+  targetId      String
+  distance      Float    // Edge length in meters
+  source        NavigationNode @relation("NodeEdges", fields: [sourceId], references: [id], onDelete: Cascade)
+  target        NavigationNode @relation("NodeTargetEdges", fields: [targetId], references: [id], onDelete: Cascade)
+}
+
+model Admin {
+  id            String   @id @default(uuid())
+  username      String   @unique
+  passwordHash  String
+  createdAt     DateTime @default(now())
+}

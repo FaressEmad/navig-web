@@ -1,0 +1,188 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* Academic Kinetic Light Theme Tokens */
+    --background: #f7f9fc;
+    --on-background: #191c1e;
+    
+    --primary: #ba0034;
+    --on-primary: #ffffff;
+    --primary-container: #e51245;
+    --on-primary-container: #fffbff;
+    
+    --secondary: #465f88;
+    --on-secondary: #ffffff;
+    --secondary-container: #b6d0ff;
+    --on-secondary-container: #3f5881;
+    
+    --surface: #f7f9fc;
+    --on-surface: #191c1e;
+    --surface-dim: #d8dadd;
+    --surface-bright: #f7f9fc;
+    --surface-container-lowest: #ffffff;
+    --surface-container-low: #f2f4f7;
+    --surface-container: #eceef1;
+    --surface-container-high: #e6e8eb;
+    --surface-container-highest: #e0e3e6;
+    
+    --outline: #916e6f;
+    --outline-variant: #e6bcbd;
+    --surface-variant: #e0e3e6;
+    --on-surface-variant: #5d3f40;
+    
+    --error: #ba1a1a;
+    --on-error: #ffffff;
+    --error-container: #ffdad6;
+    --on-error-container: #93000a;
+  }
+
+  .dark {
+    /* Academic Kinetic Dark Theme Tokens */
+    --background: #191c1e;
+    --on-background: #e1e2e5;
+    
+    --primary: #ffb3b5;
+    --on-primary: #680018;
+    --primary-container: #ba0034;
+    --on-primary-container: #ffdada;
+    
+    --secondary: #aec7f6;
+    --on-secondary: #143057;
+    --secondary-container: #2d476f;
+    --on-secondary-container: #d6e3ff;
+    
+    --surface: #191c1e;
+    --on-surface: #e1e2e5;
+    --surface-dim: #111416;
+    --surface-bright: #37393b;
+    --surface-container-lowest: #0c0e10;
+    --surface-container-low: #1a1c1e;
+    --surface-container: #1e2022;
+    --surface-container-high: #282a2c;
+    --surface-container-highest: #333537;
+    
+    --outline: #a08c8d;
+    --outline-variant: #524343;
+    --surface-variant: #524343;
+    --on-surface-variant: #d6c2c3;
+    
+    --error: #ffb4ab;
+    --on-error: #690005;
+    --error-container: #93000a;
+    --on-error-container: #ffdad6;
+  }
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-on-background: var(--on-background);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-secondary: var(--secondary);
+  --color-on-secondary: var(--on-secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-surface: var(--surface);
+  --color-on-surface: var(--on-surface);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-lowest: var(--surface-container-lowest);
+  --color-surface-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-high: var(--surface-container-high);
+  --color-surface-highest: var(--surface-container-highest);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  --color-surface-variant: var(--surface-variant);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-error: var(--error);
+  --color-on-error: var(--on-error);
+  --color-error-container: var(--error-container);
+  --color-on-error-container: var(--on-error-container);
+  
+  --font-sans: var(--font-inter), var(--font-cairo), system-ui, sans-serif;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1.5rem;
+  --spacing-safe-bottom: 2rem;
+  --spacing-margin-desktop: 2.5rem;
+  --spacing-margin-mobile: 1rem;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.dark .glass-card {
+  background: rgba(20, 22, 24, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Soft Shadows and Glows */
+.map-glow {
+  box-shadow: 0 10px 30px rgba(186, 0, 52, 0.15);
+}
+
+.dark .map-glow {
+  box-shadow: 0 10px 30px rgba(255, 179, 181, 0.08);
+}
+
+/* Base body overrides */
+body {
+  background-color: var(--background);
+  color: var(--on-background);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Custom PWA and Leaflet Overrides */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  background-color: var(--background) !important;
+  font-family: inherit !important;
+}
+
+.leaflet-bar {
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+}
+
+.leaflet-bar a {
+  background-color: var(--surface-lowest) !important;
+  color: var(--on-background) !important;
+  border-bottom: 1px solid var(--outline-variant) !important;
+  transition: all 0.2s ease;
+}
+
+.leaflet-bar a:hover {
+  background-color: var(--surface-low) !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--surface-lowest) !important;
+  backdrop-filter: blur(10px);
+  color: var(--on-background) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--surface-lowest) !important;
+}
+
+/* Scrollbar support for Apple Maps drawer style lists */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>CU Navigate - Smart Campus Wayfinding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-container": "#e51245",
+                        "secondary-fixed-dim": "#aec7f6",
+                        "secondary": "#465f88",
+                        "on-secondary-fixed": "#001b3d",
+                        "tertiary-fixed": "#e2e2e2",
+                        "on-tertiary-container": "#fcfcfc",
+                        "tertiary-container": "#737575",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#454747",
+                        "surface-variant": "#e0e3e6",
+                        "surface-bright": "#f7f9fc",
+                        "on-secondary-fixed-variant": "#2d476f",
+                        "surface-container": "#eceef1",
+                        "secondary-container": "#b6d0ff",
+                        "on-error": "#ffffff",
+                        "tertiary": "#5a5c5c",
+                        "on-tertiary-fixed": "#1a1c1c",
+                        "outline": "#916e6f",
+                        "inverse-primary": "#ffb3b5",
+                        "on-primary-fixed-variant": "#920027",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed": "#40000c",
+                        "surface-tint": "#be0036",
+                        "inverse-surface": "#2d3133",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#ffdada",
+                        "background": "#f7f9fc",
+                        "surface-container-highest": "#e0e3e6",
+                        "surface": "#f7f9fc",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#eff1f4",
+                        "surface-container-low": "#f2f4f7",
+                        "on-surface": "#191c1e",
+                        "on-secondary-container": "#3f5881",
+                        "tertiary-fixed-dim": "#c6c6c7",
+                        "surface-dim": "#d8dadd",
+                        "primary": "#ba0034",
+                        "secondary-fixed": "#d6e3ff",
+                        "on-primary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e6e8eb",
+                        "on-error-container": "#93000a",
+                        "on-background": "#191c1e",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#5d3f40",
+                        "primary-fixed-dim": "#ffb3b5",
+                        "outline-variant": "#e6bcbd"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "safe-area-bottom": "2rem",
+                        "margin-desktop": "2.5rem",
+                        "margin-mobile": "1rem",
+                        "gutter-xs": "0.5rem",
+                        "gutter-md": "1rem"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-md-mobile": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "500"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-md-mobile": ["22px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.03em", "fontWeight": "600"}],
+                        "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>.glass-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.4)
+    }
+.map-container {
+    background-image: linear-gradient(rgba(247, 249, 252, 0.1), rgba(247, 249, 252, 0.1)), url(https://lh3.googleusercontent.com/aida-public/AB6AXuAIuZTplaG-Us6ebnQ_2IyJYLujoG304yxnGXIFNnRNtFIqEJV_8RMdBDiAlKjQS-f1vGXIf59CtBr34c9ll4WEy1TrVL3mt2KH1uDFwBxKHPWoFV8im-aXI_GNNgwsR73jCC2wu04Og8yxlDso4t3Kj7Url7mfB4JXQk84npdaTBQtCjX4AWXtU2Pu7R1qqILyOoex1t3gLYw32lyIcEr4p28UAhU6jTZfIv0vFio6OY6pJf10hw);
+    background-size: cover;
+    background-position: center
+    }
+.pulse-location {
+    animation: pulse 2s infinite
+    }
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(186, 0, 52, 0.7);
+        } 70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 20px rgba(186, 0, 52, 0);
+        } 100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(186, 0, 52, 0);
+        }
+    }
+.nav-item-active {
+    transform: scale(1.1)
+    }
+::-webkit-scrollbar {
+    width: 6px
+    }
+::-webkit-scrollbar-thumb {
+    background: #e0e3e6;
+    border-radius: 10px
+    }</style>
+</head>
+<body class="bg-background text-on-surface font-body-md min-h-screen overflow-hidden selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Top Navigation Bar (Desktop) -->
+<nav class="hidden md:flex justify-between items-center w-full px-margin-desktop py-4 sticky top-0 z-50 bg-surface/85 backdrop-blur-xl border-b border-white/20 shadow-md">
+<div class="flex items-center gap-8">
+<h1 class="text-headline-md font-display-lg font-black text-primary">CU Navigate</h1>
+<div class="flex gap-6">
+<a class="text-primary font-bold border-b-2 border-primary text-label-md transition-colors" href="#">Directory</a>
+<a class="text-secondary hover:text-primary-container text-label-md transition-colors" href="#">About</a>
+<a class="text-secondary hover:text-primary-container text-label-md transition-colors" href="#">Contact</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary hover:bg-primary-container text-on-primary px-6 py-2 rounded-full font-label-md transition-all active:scale-95">Get Started</button>
+<span class="material-symbols-outlined text-secondary cursor-pointer text-2xl" data-icon="account_circle">account_circle</span>
+</div>
+</nav>
+<!-- Map Canvas -->
+<main class="relative h-screen w-full flex overflow-hidden">
+<!-- Background Map (Data Store Placeholder for Location) -->
+<div class="map-container absolute inset-0 z-0 bg-surface-dim" data-location="Giza Cairo University Campus" style="">
+<!-- Simulated UI Elements on Map -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+<div class="pulse-location w-6 h-6 bg-primary rounded-full border-4 border-white shadow-xl"></div>
+</div>
+</div>
+<!-- Sidebar / Floating Search Content -->
+<div class="relative z-20 w-full md:w-[420px] flex flex-col h-full pointer-events-none p-margin-mobile md:p-margin-desktop">
+<!-- Floating Top Card: Search Controls -->
+<div class="glass-card pointer-events-auto rounded-[24px] p-6 shadow-2xl space-y-4 mb-6 transition-all duration-500 animate-in fade-in slide-in-from-top-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="my_location" style="font-variation-settings: 'FILL' 1;">my_location</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-on-surface font-body-md placeholder:text-outline" placeholder="Your Current Location" type="text" value="Main Library Gate"/>
+</div>
+<div class="h-[1px] bg-outline-variant/30"></div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+<input autofocus="" class="w-full bg-transparent border-none focus:ring-0 text-on-surface font-body-md placeholder:text-outline" id="dest-input" placeholder="Search destination..." type="text"/>
+</div>
+<!-- Autocomplete Suggestions (Hidden by default, shown on focus simulation) -->
+<div class="pt-2 space-y-3" id="suggestions">
+<div class="flex items-center gap-3 p-2 hover:bg-primary-fixed/30 rounded-xl cursor-pointer transition-colors group">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary" data-icon="school">school</span>
+<div>
+<p class="text-label-md font-bold text-on-surface">Faculty of Engineering</p>
+<p class="text-label-sm text-secondary">Academic Road • 750m</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 hover:bg-primary-fixed/30 rounded-xl cursor-pointer transition-colors group">
+<span class="material-symbols-outlined text-secondary group-hover:text-primary" data-icon="stadium">stadium</span>
+<div>
+<p class="text-label-md font-bold text-on-surface">University Stadium</p>
+<p class="text-label-sm text-secondary">Sports Complex • 1.2km</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Result Preview Card (Conditional/Floating) -->
+<div class="glass-card pointer-events-auto rounded-[24px] overflow-hidden shadow-2xl transition-all duration-500 animate-in fade-in slide-in-from-bottom-8" id="result-card">
+<div class="relative h-40 w-full overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A cinematic, wide-angle photograph of the historic Faculty of Engineering building at Cairo University. The architectural masterpiece features grand stone facades and tall, elegant columns reflecting the heritage of the institution. The lighting is soft golden hour sun, casting long, warm shadows and highlighting the intricate textures of the stone. The image feels prestigious and clear, maintaining the light-mode UI color palette of pristine whites and subtle reds." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4hOinqjruvkJNZBcvAtajHiaLQ-uYnlAy3WxVVn27tSOAN5OuivAP8lnjjN8pxE7vtTqyv6YpoXy5Ga_BLEd5K4dkayvFofBxsmfpoVNss8fpxaBnhBwMMTFqnWNnuGuQZqj9yDwvqpMIBdzStINdUfQWjQXsecMWP74bjSfaX3jvnnyCu1rhr1xgBIq9dr61im4dKnqROJTVtIJOk8DJj3uaE63gqZ9v6kRculdKV5W2b79U7w"/>
+<div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+<h2 class="text-white font-headline-sm">Faculty of Engineering</h2>
+</div>
+</div>
+<div class="p-6 space-y-4">
+<div class="flex justify-between items-center">
+<div class="flex flex-col">
+<span class="text-primary font-bold text-headline-sm">750m</span>
+<span class="text-secondary text-label-sm">Total Distance</span>
+</div>
+<div class="flex flex-col text-right">
+<span class="text-on-surface font-bold text-headline-sm">8 mins</span>
+<span class="text-secondary text-label-sm">ETA 10:15 AM</span>
+</div>
+</div>
+<div class="flex gap-2 text-secondary">
+<span class="material-symbols-outlined text-[18px]" data-icon="directions_walk">directions_walk</span>
+<span class="text-label-md">Optimized pedestrian route available</span>
+</div>
+<button class="w-full bg-primary-container text-on-primary-container py-4 rounded-full font-bold text-headline-sm-mobile shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="navigation" style="font-variation-settings: 'FILL' 1;">navigation</span>
+                        Start Navigation
+                    </button>
+</div>
+</div>
+</div>
+<!-- Floating Action Button (FAB) -->
+<button class="fixed bottom-24 right-margin-mobile md:bottom-margin-desktop md:right-margin-desktop z-30 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform active:scale-90">
+<span class="material-symbols-outlined text-3xl" data-icon="explore">explore</span>
+</button>
+</main>
+<!-- Bottom Navigation Bar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 bg-white/85 backdrop-blur-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)] flex justify-around items-center px-4 pt-3 pb-safe rounded-t-[24px]">
+<div class="flex flex-col items-center justify-center text-primary scale-110 transition-all duration-300">
+<span class="material-symbols-outlined" data-icon="explore" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="text-label-sm font-label-sm">Explore</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary opacity-60 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="text-label-sm font-label-sm">Recent</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary opacity-60 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-4xl -mt-2" data-icon="add_circle">add_circle</span>
+<span class="text-label-sm font-label-sm">Add</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary opacity-60 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+<span class="text-label-sm font-label-sm">Campus</span>
+</div>
+<div class="flex flex-col items-center justify-center text-secondary opacity-60 hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-label-sm font-label-sm">Profile</span>
+</div>
+</nav>
+<script>
+        // Micro-interactions and simple state simulation
+        document.addEventListener('DOMContentLoaded', () => {
+            const destInput = document.getElementById('dest-input');
+            const suggestions = document.getElementById('suggestions');
+            const resultCard = document.getElementById('result-card');
+
+            // Toggle visibility of suggestions based on focus
+            destInput.addEventListener('focus', () => {
+                suggestions.classList.remove('hidden');
+                resultCard.classList.add('opacity-40', 'blur-sm');
+            });
+
+            destInput.addEventListener('blur', () => {
+                setTimeout(() => {
+                    suggestions.classList.add('hidden');
+                    resultCard.classList.remove('opacity-40', 'blur-sm');
+                }, 200);
+            });
+
+            // Simulate clicking a result
+            suggestions.children[0].addEventListener('click', () => {
+                destInput.value = "Faculty of Engineering";
+                suggestions.classList.add('hidden');
+                resultCard.style.transform = 'translateY(0)';
+                resultCard.style.opacity = '1';
+            });
+        });
+    </script>
+</body></html>

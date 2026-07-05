@@ -1,0 +1,26 @@
+{
+  "name": "CU Navigate - Cairo University Wayfinding",
+  "short_name": "CU Navigate",
+  "description": "Smart campus navigation and wayfinding system for Cairo University.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f9fc",
+  "theme_color": "#ba0034",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["navigation", "utilities", "education"],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
