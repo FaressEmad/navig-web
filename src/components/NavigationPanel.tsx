@@ -26,7 +26,8 @@ export default function NavigationPanel() {
     currentStepIndex,
     setCurrentStepIndex,
     setActiveSheet,
-    setSelectedPlace
+    setSelectedPlace,
+    setAutoFollowEnabled
   } = useStore();
 
   if (!isNavigating || !activeRoute || !destinationPlace) return null;
@@ -50,6 +51,7 @@ export default function NavigationPanel() {
     setIsNavigating(false);
     setActiveSheet("search");
     setSelectedPlace(null);
+    setAutoFollowEnabled(true);
   };
 
   const isRtl = language === "ar";

@@ -2,10 +2,11 @@
 
 import React, { useEffect, useRef } from "react";
 import L from "leaflet";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents, GeoJSON } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useStore } from "../hooks/useStore";
 import { Place } from "../types";
+import { CampusBoundaryService } from "../services/campusBoundary";
 
 // Leaflet marker configuration fix (uses inline SVGs for premium look and avoiding assets packaging issues)
 const createCustomIcon = (type: string, isSelected: boolean) => {
@@ -34,7 +35,7 @@ const createCustomIcon = (type: string, isSelected: boolean) => {
   });
 };
 
-// Map controller: only reacts to explicit flyTo requests via a counter
+// Map controller: only reacts to explicit flyTo requests via a counter or auto-follow updates
 function MapController() {
   const map = useMap();
   const mapCenter = useStore((state) => state.mapCenter);
@@ -42,35 +43,194 @@ function MapController() {
   const flyToCounter = useStore((state) => state.flyToCounter);
   const lastProcessedRef = useRef(0);
 
+  const userLocation = useStore((state) => state.userLocation);
+  const isNavigating = useStore((state) => state.isNavigating);
+  const isAutoFollowEnabled = useStore((state) => state.isAutoFollowEnabled);
+  const boundaryGeoJSON = useStore((state) => state.boundaryGeoJSON);
+  const userHeading = useStore((state) => state.userHeading);
+  const setMapReady = useStore((state) => state.setMapReady);
+
+  // Set isMapReady to true when map mounts and is loaded, and false on unmount
   useEffect(() => {
+    if (!map) return;
+
+    const checkAndSetReady = () => {
+      if ((map as any)._loaded) {
+        setMapReady(true);
+      }
+    };
+
+    if ((map as any)._loaded) {
+      setMapReady(true);
+    } else {
+      map.on("load", checkAndSetReady);
+    }
+
+    return () => {
+      setMapReady(false);
+      try {
+        map.off("load", checkAndSetReady);
+        map.stop(); // Stop any pending pan/zoom animations before map is unmounted!
+      } catch (e) {
+        // ignore
+      }
+    };
+  }, [map, setMapReady]);
+
+  // Helper to calculate camera center with lower-third offset (Google Maps driving offset style)
+  const getOffsetCenter = (latlng: [number, number]): [number, number] => {
+    try {
+      if (!map || !(map as any)._loaded || !map.getContainer()) return latlng;
+      const size = map.getSize();
+      // Target position is in the lower third (shift map center up by height / 6 pixels)
+      const offsetY = size.y / 6;
+      
+      const userPoint = map.latLngToContainerPoint(latlng);
+      const targetPoint = L.point(userPoint.x, userPoint.y - offsetY);
+      const targetLatLng = map.containerPointToLatLng(targetPoint);
+      return [targetLatLng.lat, targetLatLng.lng];
+    } catch (e) {
+      // Fallback: slight latitude shift North (approx 25-30m at zoom 19)
+      return [latlng[0] + 0.00025, latlng[1]];
+    }
+  };
+
+  useEffect(() => {
+    if (!map || !(map as any)._loaded || !map.getContainer()) return;
     // Only fly when a new explicit request comes in (counter incremented)
     if (flyToCounter > lastProcessedRef.current) {
       lastProcessedRef.current = flyToCounter;
-      map.flyTo(mapCenter, mapZoom, {
-        animate: true,
-        duration: 0.8,
-      });
+      
+      let target = mapCenter;
+      let targetZoom = mapZoom;
+      if (isNavigating) {
+        target = getOffsetCenter(mapCenter);
+        targetZoom = 19;
+      }
+
+      try {
+        map.flyTo(target, targetZoom, {
+          animate: true,
+          duration: 0.8,
+        });
+      } catch (e) {
+        console.error("Leaflet flyTo error:", e);
+      }
     }
-  }, [flyToCounter, mapCenter, mapZoom, map]);
+  }, [flyToCounter, mapCenter, mapZoom, map, isNavigating]);
+
+  // Center map on user location if auto-follow is active and userLocation changes
+  useEffect(() => {
+    if (!map || !(map as any)._loaded || !map.getContainer()) return;
+    if (isNavigating && isAutoFollowEnabled && userLocation) {
+      const target = getOffsetCenter(userLocation);
+      try {
+        map.setView(target, 19, {
+          animate: true,
+          duration: 0.5,
+        });
+      } catch (e) {
+        console.error("Leaflet setView error:", e);
+      }
+    }
+  }, [userLocation, isNavigating, isAutoFollowEnabled, map]);
+
+  // Fit bounds to campus polygon and restrict panning using CampusBoundaryService
+  useEffect(() => {
+    if (!map || !(map as any)._loaded || !map.getContainer()) return;
+    if (boundaryGeoJSON) {
+      try {
+        CampusBoundaryService.fitCampusBounds(map);
+        CampusBoundaryService.limitMapBounds(map);
+      } catch (e) {
+        console.error("Leaflet bounds error:", e);
+      }
+    }
+  }, [boundaryGeoJSON, map]);
 
   // Invalidate map size after container resizes (fixes blank tiles)
   useEffect(() => {
+    if (!map || !(map as any)._loaded || !map.getContainer()) return;
     const timer = setTimeout(() => {
-      map.invalidateSize();
+      try {
+        map.invalidateSize();
+      } catch (e) {
+        console.error("Leaflet invalidateSize error:", e);
+      }
     }, 300);
     return () => clearTimeout(timer);
   }, [map]);
+
+  // Rotate the map container pane beneath the user's heading (Google/Apple Maps style)
+  useEffect(() => {
+    if (!map || !(map as any)._loaded || !map.getContainer()) return;
+    try {
+      const container = map.getContainer();
+      if (container) {
+        if (isNavigating && isAutoFollowEnabled) {
+          container.style.setProperty("--map-rotation", `${-userHeading}deg`);
+        } else {
+          container.style.setProperty("--map-rotation", "0deg");
+        }
+      }
+    } catch (e) {
+      console.error("Leaflet rotation error:", e);
+    }
+  }, [userHeading, isNavigating, isAutoFollowEnabled, map]);
 
   return null;
 }
 
 // Sync user's manual zoom/pan back to store (so we don't override it)
 function MapEventSync() {
+  const setAutoFollowEnabled = useStore((state) => state.setAutoFollowEnabled);
+  const isAutoFollowEnabled = useStore((state) => state.isAutoFollowEnabled);
+  const isNavigating = useStore((state) => state.isNavigating);
+
+  const isSelectingManualStart = useStore((state) => state.isSelectingManualStart);
+  const setSelectingManualStart = useStore((state) => state.setSelectingManualStart);
+  const setStartPlace = useStore((state) => state.setStartPlace);
+  const setUserLocation = useStore((state) => state.setUserLocation);
+  const language = useStore((state) => state.language);
+
   useMapEvents({
-    moveend: () => {
-      // We don't sync back to store — we just let the user move freely
-      // Only explicit flyTo calls (via counter) will move the map
+    dragstart: () => {
+      if (isNavigating && isAutoFollowEnabled) {
+        setAutoFollowEnabled(false);
+      }
     },
+    zoomstart: () => {
+      if (isNavigating && isAutoFollowEnabled) {
+        setAutoFollowEnabled(false);
+      }
+    },
+    click: (e) => {
+      if (isSelectingManualStart) {
+        const lat = e.latlng.lat;
+        const lng = e.latlng.lng;
+
+        if (CampusBoundaryService.isInsideCampus(lat, lng)) {
+          const manualStart = {
+            id: "manual-location",
+            nameEn: "Manual Starting Point",
+            nameAr: "نقطة بداية يدوية",
+            descriptionEn: "Manually selected starting location",
+            descriptionAr: "موقع بداية محدد يدوياً",
+            type: "LANDMARK" as const,
+            latitude: lat,
+            longitude: lng,
+            floor: null,
+            roomNumber: null,
+            facultyId: null,
+            buildingId: null,
+          };
+
+          setStartPlace(manualStart);
+          setUserLocation([lat, lng]);
+          setSelectingManualStart(false);
+        }
+      }
+    }
   });
   return null;
 }
@@ -86,7 +246,10 @@ export default function CampusMapInner({ places }: CampusMapInnerProps) {
     activeRoute,
     isNavigating,
     userLocation,
-    destinationPlace
+    destinationPlace,
+    boundaryGeoJSON,
+    userHeading,
+    isAutoFollowEnabled
   } = useStore();
 
   // Dark mode map tile styling override (Leaflet filters for map styling)
@@ -138,24 +301,44 @@ export default function CampusMapInner({ places }: CampusMapInnerProps) {
           }}
         />
 
+        {/* Transparent Campus Polygon (development only) */}
+        {process.env.NODE_ENV === "development" && boundaryGeoJSON && (
+          <GeoJSON
+            data={boundaryGeoJSON}
+            style={{
+              color: "#0066cc",
+              weight: 2,
+              fillColor: "#0066cc",
+              fillOpacity: 0.2
+            }}
+          />
+        )}
+
         {/* Dynamic Map Controller — only moves on explicit flyTo calls */}
         <MapController />
         <MapEventSync />
 
-        {/* User Location Pulsing Dot */}
+        {/* User Location Pulsing Dot / Rotating Arrow Pointer */}
         {userLocation && (
           <Marker 
+            key={`user-loc-${userLocation[0]}-${userLocation[1]}-${userHeading}`}
             position={userLocation}
             icon={L.divIcon({
-              html: `
+              html: isNavigating ? `
+                <div class="relative flex items-center justify-center w-8 h-8">
+                  <svg viewBox="0 0 24 24" class="w-7 h-7 text-blue-600 drop-shadow-md" style="transform: rotate(${userHeading}deg);" fill="currentColor">
+                    <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" />
+                  </svg>
+                </div>
+              ` : `
                 <div class="relative flex items-center justify-center w-6 h-6">
                   <div class="absolute w-full h-full bg-blue-500/30 rounded-full animate-ping"></div>
                   <div class="w-3.5 h-3.5 rounded-full bg-blue-600 border-2 border-white shadow-md"></div>
                 </div>
               `,
               className: "user-location-marker",
-              iconSize: [24, 24],
-              iconAnchor: [12, 12]
+              iconSize: isNavigating ? [32, 32] : [24, 24],
+              iconAnchor: isNavigating ? [16, 16] : [12, 12]
             })}
           >
             <Popup>You are here</Popup>
@@ -179,8 +362,8 @@ export default function CampusMapInner({ places }: CampusMapInnerProps) {
           />
         )}
 
-        {/* Place Markers */}
-        {places.map((place) => {
+        {/* Place Markers (Hidden during navigation for distraction-free mode) */}
+        {!isNavigating && places.map((place) => {
           const isSelected = selectedPlace?.id === place.id;
           return (
             <Marker
@@ -207,14 +390,14 @@ export default function CampusMapInner({ places }: CampusMapInnerProps) {
           );
         })}
 
-        {/* Active Route Line Overlay */}
-        {isNavigating && activeRoute && activeRoute.path.length > 0 && (
+        {/* Walking Route Line Overlay — styled like Google Maps */}
+        {activeRoute && activeRoute.path.length > 0 && (
           <Polyline
             positions={activeRoute.path}
             pathOptions={{
-              color: "#ba0034", // Electric Pink Route Line
-              weight: 6,
-              opacity: 0.85,
+              color: isNavigating ? "#1a73e8" : "#8ab4f8",
+              weight: isNavigating ? 10 : 8,
+              opacity: isNavigating ? 0.9 : 0.75,
               lineCap: "round",
               lineJoin: "round",
             }}

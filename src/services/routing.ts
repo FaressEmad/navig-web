@@ -1,4 +1,6 @@
-import { NavigationNode, NavigationEdge, RouteData, NavInstruction, Place } from "../types";
+import { RouteData, NavInstruction } from "../types";
+import { CampusBoundaryService } from "./campusBoundary";
+import { useStore } from "../hooks/useStore";
 
 // Helper to calculate distance in meters between two coordinates using Haversine formula
 export function getHaversineDistance(
@@ -24,199 +26,176 @@ export function getHaversineDistance(
   return R * c; // in meters
 }
 
-// Find the closest navigation node to a given coordinate
-export function findClosestNode(
-  latitude: number,
-  longitude: number,
-  nodes: NavigationNode[]
-): NavigationNode | null {
-  if (nodes.length === 0) return null;
-
-  let closestNode: NavigationNode | null = null;
-  let minDistance = Infinity;
-
-  for (const node of nodes) {
-    const distance = getHaversineDistance(latitude, longitude, node.latitude, node.longitude);
-    if (distance < minDistance) {
-      minDistance = distance;
-      closestNode = node;
-    }
-  }
-
-  return closestNode;
-}
-
-// Dijkstra's algorithm for shortest pathfinding
-export function calculateShortestPath(
-  startNodeId: string,
-  endNodeId: string,
-  nodes: NavigationNode[],
-  edges: NavigationEdge[]
-): NavigationNode[] {
-  const distances: { [key: string]: number } = {};
-  const previous: { [key: string]: string | null } = {};
-  const queue: string[] = [];
-
-  // Initialize
-  for (const node of nodes) {
-    distances[node.id] = node.id === startNodeId ? 0 : Infinity;
-    previous[node.id] = null;
-    queue.push(node.id);
-  }
-
-  // Helper map for node coordinates
-  const nodesMap = new Map<string, NavigationNode>();
-  for (const node of nodes) {
-    nodesMap.set(node.id, node);
-  }
-
-  // Build adjacency list for fast graph lookup
-  const adj: { [key: string]: { node: string; weight: number }[] } = {};
-  for (const node of nodes) {
-    adj[node.id] = [];
-  }
-  for (const edge of edges) {
-    if (adj[edge.sourceId] && adj[edge.targetId]) {
-      adj[edge.sourceId].push({ node: edge.targetId, weight: edge.distance });
-      adj[edge.targetId].push({ node: edge.sourceId, weight: edge.distance });
-    }
-  }
-
-  while (queue.length > 0) {
-    // Extract min distance node from queue
-    queue.sort((a, b) => distances[a] - distances[b]);
-    const u = queue.shift()!;
-
-    if (u === endNodeId) break;
-    if (distances[u] === Infinity) break;
-
-    const neighbors = adj[u] || [];
-    for (const neighbor of neighbors) {
-      const v = neighbor.node;
-      if (!queue.includes(v)) continue;
-
-      const alt = distances[u] + neighbor.weight;
-      if (alt < distances[v]) {
-        distances[v] = alt;
-        previous[v] = u;
-      }
-    }
-  }
-
-  // Reconstruct path
-  const path: NavigationNode[] = [];
-  let curr: string | null = endNodeId;
-
-  if (previous[curr] !== null || curr === startNodeId) {
-    while (curr !== null) {
-      const node = nodesMap.get(curr);
-      if (node) {
-        path.unshift(node);
-      }
-      curr = previous[curr];
-    }
-  }
-
-  return path;
-}
-
-// Generate bilingual walking instructions based on Dijkstra nodes path
-export function generateRoute(
-  startPlace: Place,
-  destinationPlace: Place,
-  nodes: NavigationNode[],
-  edges: NavigationEdge[]
-): RouteData | null {
-  // 1. Find closest entry node for Start
-  const startNode = findClosestNode(startPlace.latitude, startPlace.longitude, nodes);
-  // 2. Find closest entry node for Destination
-  const destNode = findClosestNode(destinationPlace.latitude, destinationPlace.longitude, nodes);
-
-  if (!startNode || !destNode) return null;
-
-  // 3. Find path of waypoints
-  const pathNodes = calculateShortestPath(startNode.id, destNode.id, nodes, edges);
-
-  if (pathNodes.length === 0) return null;
-
-  // 4. Assemble coordinates path
-  const path: [number, number][] = [
-    [startPlace.latitude, startPlace.longitude],
-    ...pathNodes.map(n => [n.latitude, n.longitude] as [number, number]),
-    [destinationPlace.latitude, destinationPlace.longitude]
-  ];
-
-  // 5. Calculate step distance and instructions
-  const instructions: NavInstruction[] = [];
-  let totalDistance = 0;
-
-  // Step 1: Walk from Start Place to closest Entry waypoint
-  const firstDistance = Math.round(getHaversineDistance(
-    startPlace.latitude,
-    startPlace.longitude,
-    startNode.latitude,
-    startNode.longitude
-  ));
+function getStepInstructionEn(type: string, modifier: string, name: string): string {
+  const street = name ? `onto ${name}` : "along the path";
+  const direction = modifier ? modifier.replace("-", " ") : "";
   
-  totalDistance += firstDistance;
-  instructions.push({
-    instructionEn: `Walk from ${startPlace.nameEn} toward the main pathway`,
-    instructionAr: `امشِ من ${startPlace.nameAr} باتجاه الممشى الرئيسي`,
-    distance: firstDistance,
-    coordinate: [startPlace.latitude, startPlace.longitude]
-  });
-
-  // Step 2: Internal path coordinates directions
-  for (let i = 0; i < pathNodes.length - 1; i++) {
-    const current = pathNodes[i];
-    const next = pathNodes[i + 1];
-    
-    // Find edge distance
-    const edge = edges.find(
-      e => (e.sourceId === current.id && e.targetId === next.id) ||
-           (e.sourceId === next.id && e.targetId === current.id)
-    );
-    const dist = edge ? edge.distance : Math.round(getHaversineDistance(current.latitude, current.longitude, next.latitude, next.longitude));
-
-    totalDistance += dist;
-
-    // Generate descriptive instruction based on landmarks
-    const currentName = current.name || `Waypoint ${current.id}`;
-    const nextName = next.name || `Waypoint ${next.id}`;
-    
-    instructions.push({
-      instructionEn: `Continue along the road from ${currentName} to ${nextName}`,
-      instructionAr: `تابع السير في الطريق من ${currentName} إلى ${nextName}`,
-      distance: dist,
-      coordinate: [current.latitude, current.longitude]
-    });
+  switch (type) {
+    case "depart":
+      return `Head ${direction} ${street}`;
+    case "arrive":
+      return "Arrive at your destination";
+    case "turn":
+      return `Turn ${direction} ${street}`;
+    case "new name":
+      return `Continue ${street}`;
+    case "straight":
+      return `Go straight ${street}`;
+    case "fork":
+      return `Take the fork ${direction} ${street}`;
+    case "roundabout":
+      return `Enter roundabout and take exit ${direction}`;
+    case "merge":
+      return `Merge ${direction} ${street}`;
+    default:
+      return `Continue ${direction} ${street}`;
   }
+}
 
-  // Step 3: Walk from last waypoint to Destination Place
-  const lastNode = pathNodes[pathNodes.length - 1];
-  const lastDistance = Math.round(getHaversineDistance(
-    lastNode.latitude,
-    lastNode.longitude,
-    destinationPlace.latitude,
-    destinationPlace.longitude
-  ));
+function getStepInstructionAr(type: string, modifier: string, name: string): string {
+  const arModifier = getArModifier(modifier);
+  const street = name ? `إلى ${name}` : "على طول الممر";
+  
+  switch (type) {
+    case "depart":
+      return `ابدأ السير ${arModifier} ${street}`;
+    case "arrive":
+      return "الوصول إلى وجهتك";
+    case "turn":
+      return `انعطف ${arModifier} ${street}`;
+    case "new name":
+      return `تابع السير ${street}`;
+    case "straight":
+      return `تابع السير مباشرة ${street}`;
+    case "fork":
+      return `اسلك المفرق ${arModifier} ${street}`;
+    case "roundabout":
+      return `ادخل الدوار واسلك المخرج ${arModifier}`;
+    case "merge":
+      return `اندمج ${arModifier} ${street}`;
+    default:
+      return `تابع السير ${arModifier} ${street}`;
+  }
+}
 
-  totalDistance += lastDistance;
-  instructions.push({
-    instructionEn: `Turn and enter ${destinationPlace.nameEn}`,
-    instructionAr: `انعطف وادخل إلى ${destinationPlace.nameAr}`,
-    distance: lastDistance,
-    coordinate: [lastNode.latitude, lastNode.longitude]
-  });
+function getArModifier(modifier: string): string {
+  switch (modifier) {
+    case "left":
+      return "يساراً";
+    case "right":
+      return "يميناً";
+    case "sharp left":
+      return "يساراً بشكل حاد";
+    case "sharp right":
+      return "يميناً بشكل حاد";
+    case "slight left":
+      return "قليلاً نحو اليسار";
+    case "slight right":
+      return "قليلاً نحو اليمين";
+    case "straight":
+      return "مباشرة";
+    case "uturn":
+      return "للدوران للخلف";
+    default:
+      return "";
+  }
+}
 
-  // 6. Calculate duration in minutes (average walking speed = 1.3 m/s)
-  const walkingSpeed = 1.3;
-  const duration = Math.max(1, Math.round(totalDistance / walkingSpeed / 60));
+// Generate bilingual walking instructions using the public OSRM foot routing endpoint
+export async function generateRoute(
+  startPlace: { latitude: number; longitude: number; nameEn?: string; nameAr?: string },
+  destinationPlace: { latitude: number; longitude: number; nameEn?: string; nameAr?: string }
+): Promise<RouteData | null> {
+  const startLat = startPlace.latitude;
+  const startLng = startPlace.longitude;
+  const destLat = destinationPlace.latitude;
+  const destLng = destinationPlace.longitude;
 
-  return {
-    path,
-    distance: Math.round(totalDistance),
-    duration,
-    instructions
-  };
+  const url = `https://router.project-osrm.org/route/v1/foot/${startLng},${startLat};${destLng},${destLat}?overview=full&geometries=geojson&steps=true`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("OSRM routing request failed");
+    const data = await res.json();
+
+    if (data.code !== "Ok" || !data.routes || data.routes.length === 0) {
+      return null;
+    }
+
+    const route = data.routes[0];
+    // OSRM returns geometry coordinates as [longitude, latitude]
+    const path: [number, number][] = route.geometry.coordinates.map((coord: [number, number]) => [
+      coord[1],
+      coord[0]
+    ] as [number, number]);
+
+    // Verify first route coordinate is inside campus boundary
+    if (path.length > 0) {
+      const [startLatCoord, startLngCoord] = path[0];
+      if (!CampusBoundaryService.isInsideCampus(startLatCoord, startLngCoord)) {
+        const lang = useStore.getState().language;
+        alert(lang === "en"
+          ? "The snapped starting point is outside Cairo University.\nPlease choose another starting point."
+          : "نقطة البداية المحددة تقع خارج جامعة القاهرة بعد مطابقتها للطريق.\nيرجى اختيار نقطة بداية أخرى.");
+        return null;
+      }
+    }
+
+    // Verify every coordinate in the route remains inside campus boundary
+    for (const [lat, lng] of path) {
+      if (!CampusBoundaryService.isInsideCampus(lat, lng)) {
+        const lang = useStore.getState().language;
+        alert(lang === "en"
+          ? "Unable to calculate a campus-only walking route."
+          : "تعذر حساب مسار مشي داخل الحرم الجامعي فقط.");
+        return null;
+      }
+    }
+
+    const distance = Math.round(route.distance);
+    // Average walking duration in minutes
+    const duration = Math.max(1, Math.round(route.duration / 60));
+
+    const instructions: NavInstruction[] = [];
+
+    if (route.legs && route.legs[0] && route.legs[0].steps) {
+      const steps = route.legs[0].steps;
+      for (const step of steps) {
+        const type = step.maneuver.type;
+        const modifier = step.maneuver.modifier || "";
+        const name = step.name || "";
+        const stepDist = Math.round(step.distance);
+        const location = step.maneuver.location; // [lon, lat]
+
+        const instructionEn = getStepInstructionEn(type, modifier, name);
+        const instructionAr = getStepInstructionAr(type, modifier, name);
+
+        instructions.push({
+          instructionEn,
+          instructionAr,
+          distance: stepDist,
+          coordinate: [location[1], location[0]] as [number, number]
+        });
+      }
+    }
+
+    if (instructions.length === 0) {
+      instructions.push({
+        instructionEn: "Depart toward destination",
+        instructionAr: "التحرك نحو الوجهة",
+        distance: distance,
+        coordinate: [startLat, startLng]
+      });
+    }
+
+    return {
+      path,
+      distance,
+      duration,
+      instructions
+    };
+  } catch (error) {
+    console.error("OSRM Routing Error:", error);
+    return null;
+  }
 }

@@ -19,7 +19,8 @@ import {
   Star,
   Sparkles,
   MapPin,
-  Clock
+  Clock,
+  GraduationCap
 } from "lucide-react";
 
 export default function LandingPage() {
@@ -124,7 +125,7 @@ export default function LandingPage() {
               {/* Phone screen mockup */}
               <div className="w-full h-full bg-slate-50 rounded-[2rem] overflow-hidden flex flex-col relative">
                 {/* Visual Map rendering */}
-                <div className="absolute inset-0 bg-slate-100/50 flex flex-col justify-between p-4 bg-cover" style={{ backgroundImage: "url('https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/31.2085,30.0275,15.5,0/320x600?access_token=mock')" }}>
+                <div className="absolute inset-0 bg-slate-100/50 flex flex-col justify-between p-4 bg-cover bg-center" style={{ backgroundImage: "url('/images/campus_navigation_bg.png')" }}>
                   {/* Top search overlay */}
                   <div className="w-full bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-lg border border-slate-150 flex flex-col gap-2 mt-4">
                     <div className="flex items-center gap-2 bg-slate-100 p-2 rounded-lg">
@@ -136,6 +137,47 @@ export default function LandingPage() {
                       <span className="text-[10px] font-bold text-slate-900">Shora Lecture Hall</span>
                     </div>
                   </div>
+                  {/* Center pin icon with graduation cap */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="relative flex flex-col items-center justify-center -mt-6">
+                      {/* Pulsing ring animation */}
+                      <div className="absolute w-12 h-12 bg-primary/20 rounded-full animate-ping opacity-75" />
+                      
+                      {/* Map Pin base shadow */}
+                      <div className="absolute bottom-[-6px] w-8 h-2.5 bg-black/15 rounded-full blur-[1px]" />
+                      
+                      {/* The Pin container */}
+                      <div className="relative z-10 w-16 h-16 drop-shadow-xl flex items-center justify-center animate-bounce duration-1000">
+                        {/* Custom Map Pin SVG in theme colors */}
+                        <svg viewBox="0 0 100 100" className="w-full h-full filter drop-shadow-[0_4px_6px_rgba(186,0,52,0.25)]">
+                          {/* Map Pin Outline and Fill */}
+                          <path 
+                            d="M50,90 C45,80 15,62 15,38 A35,35 0 0,1 85,38 C85,62 55,80 50,90 Z" 
+                            fill="url(#pinGrad)" 
+                            stroke="#ba0034" 
+                            strokeWidth="3" 
+                            strokeLinejoin="round" 
+                          />
+                          {/* Inner circle wrapper */}
+                          <circle cx="50" cy="38" r="21" fill="#ffffff" stroke="#ba0034" strokeWidth="2.5" />
+                          
+                          {/* SVG Gradients definitions */}
+                          <defs>
+                            <linearGradient id="pinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                              <stop offset="0%" stopColor="#e51245" />
+                              <stop offset="100%" stopColor="#ba0034" />
+                            </linearGradient>
+                          </defs>
+                        </svg>
+                        
+                        {/* Lucide GraduationCap React Component placed inside the white circle */}
+                        <div className="absolute top-[38%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[34%] h-[34%] text-primary flex items-center justify-center">
+                          <GraduationCap className="w-full h-full stroke-[2.2]" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Navigation steps prompt */}
                   <div className="w-full bg-white p-3.5 rounded-2xl shadow-xl border border-slate-100 flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">

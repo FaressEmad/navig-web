@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import dynamic from "next/dynamic";
 import { Place } from "../types";
+import { useStore } from "../hooks/useStore";
+import { CampusBoundaryService } from "../services/campusBoundary";
 
 // Dynamically load the actual Leaflet Map implementation with Server-Side Rendering (SSR) disabled
 // This prevents Next.js compiler from attempting to compile window/leaflet variables on the server.
@@ -24,9 +26,17 @@ interface CampusMapProps {
 }
 
 export default function CampusMap({ places }: CampusMapProps) {
+  const boundaryGeoJSON = useStore((state) => state.boundaryGeoJSON);
+
+  const filteredPlaces = useMemo(() => {
+    return places.filter((place) => 
+      CampusBoundaryService.isInsideCampus(place.latitude, place.longitude)
+    );
+  }, [places, boundaryGeoJSON]);
+
   return (
     <div className="w-full h-full bg-surface relative">
-      <CampusMapInner places={places} />
+      <CampusMapInner places={filteredPlaces} />
     </div>
   );
 }

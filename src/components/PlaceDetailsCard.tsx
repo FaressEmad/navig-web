@@ -44,7 +44,7 @@ export default function PlaceDetailsCard({ places }: PlaceDetailsCardProps) {
   // Filter classrooms/offices that are located inside this specific building
   const indoorRooms = places.filter(p => p.buildingId === selectedPlace.id);
 
-  const handleStartNav = () => {
+  const handleStartNav = async () => {
     const currentLoc = userLocation;
     let startPoint: Place;
 
@@ -70,9 +70,7 @@ export default function PlaceDetailsCard({ places }: PlaceDetailsCardProps) {
     setStartPlace(startPoint);
     setDestinationPlace(selectedPlace);
 
-    const nodes = useStore.getState().nodes;
-    const edges = useStore.getState().edges;
-    const route = generateRoute(startPoint, selectedPlace, nodes, edges);
+    const route = await generateRoute(startPoint, selectedPlace);
     
     if (route) {
       setActiveRoute(route);

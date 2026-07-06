@@ -186,3 +186,20 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Butter-smooth transition animations for user navigation arrow location and rotation updates */
+.user-location-marker, .user-location-marker svg {
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), left 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), top 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+/* Smooth map sub-panes rotation for heading-up navigation without breaking map drag panning */
+.leaflet-tile-pane,
+.leaflet-shadow-pane,
+.leaflet-overlay-pane,
+.leaflet-marker-pane,
+.leaflet-tooltip-pane,
+.leaflet-popup-pane {
+  transform: rotate(var(--map-rotation, 0deg)) !important;
+  transform-origin: center !important;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}

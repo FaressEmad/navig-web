@@ -41,7 +41,7 @@ export default function DestinationClient({ place, allPlaces }: DestinationClien
   const name = language === "en" ? place.nameEn : place.nameAr;
   const desc = language === "en" ? place.descriptionEn : place.descriptionAr;
 
-  const handleStartNav = () => {
+  const handleStartNav = async () => {
     const currentLoc = userLocation;
     let startPoint: Place;
 
@@ -68,9 +68,7 @@ export default function DestinationClient({ place, allPlaces }: DestinationClien
     setDestinationPlace(place);
     setSelectedPlace(place);
 
-    const nodes = useStore.getState().nodes;
-    const edges = useStore.getState().edges;
-    const route = generateRoute(startPoint, place, nodes, edges);
+    const route = await generateRoute(startPoint, place);
     
     if (route) {
       setActiveRoute(route);

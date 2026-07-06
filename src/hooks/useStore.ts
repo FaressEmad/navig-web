@@ -54,6 +54,30 @@ interface AppState {
   setIsSearchFocused: (focus: boolean) => void;
   activeSheet: "search" | "details" | "navigation" | "directory" | null;
   setActiveSheet: (sheet: "search" | "details" | "navigation" | "directory" | null) => void;
+
+  // Auto-follow state for navigation
+  isAutoFollowEnabled: boolean;
+  setAutoFollowEnabled: (enabled: boolean) => void;
+
+  // Campus Boundary GeoJSON
+  boundaryGeoJSON: any | null;
+  setBoundaryGeoJSON: (geojson: any | null) => void;
+
+  // Manual start selection mode
+  isSelectingManualStart: boolean;
+  setSelectingManualStart: (val: boolean) => void;
+
+  // Current user GPS location state
+  currentUserLocation: [number, number] | null;
+  setCurrentUserLocation: (location: [number, number] | null) => void;
+
+  // Navigation Heading state (degrees)
+  userHeading: number;
+  setUserHeading: (heading: number) => void;
+
+  // Map Ready state
+  isMapReady: boolean;
+  setMapReady: (val: boolean) => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -135,6 +159,30 @@ export const useStore = create<AppState>((set) => ({
   setIsSearchFocused: (isSearchFocused) => set({ isSearchFocused }),
   activeSheet: "search",
   setActiveSheet: (activeSheet) => set({ activeSheet }),
+
+  // Auto-follow defaults
+  isAutoFollowEnabled: true,
+  setAutoFollowEnabled: (isAutoFollowEnabled) => set({ isAutoFollowEnabled }),
+
+  // Campus Boundary
+  boundaryGeoJSON: null,
+  setBoundaryGeoJSON: (boundaryGeoJSON) => set({ boundaryGeoJSON }),
+
+  // Manual start selection mode
+  isSelectingManualStart: false,
+  setSelectingManualStart: (isSelectingManualStart) => set({ isSelectingManualStart }),
+
+  // Current user GPS location defaults
+  currentUserLocation: null,
+  setCurrentUserLocation: (currentUserLocation) => set({ currentUserLocation }),
+
+  // User Heading defaults
+  userHeading: 0,
+  setUserHeading: (userHeading) => set({ userHeading }),
+
+  // Map Ready defaults
+  isMapReady: false,
+  setMapReady: (isMapReady) => set({ isMapReady }),
 }));
 
 export default useStore;

@@ -387,11 +387,11 @@ export default function AdminDashboardClient({
           </div>
         </div>
 
-        <div className="flex flex-col bg-surface-container/30 border border-outline-variant/5 rounded-2xl p-2.5">
+        <div className="flex flex-row md:flex-col bg-surface-container/30 border border-outline-variant/5 rounded-2xl p-2 md:p-2.5 overflow-x-auto md:overflow-visible flex-nowrap md:flex-wrap gap-2 scrollbar-hide">
           <button
             onClick={() => { setActiveTab("overview"); setIsEditingBuilding(false); setIsEditingRef(false); }}
-            className={`w-full p-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 active:scale-95 ${
-              activeTab === "overview" ? "bg-primary text-white shadow-md" : "text-secondary hover:bg-surface-variant/20"
+            className={`p-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 active:scale-95 whitespace-nowrap flex-shrink-0 md:w-full ${
+              activeTab === "overview" ? "bg-primary text-white shadow-md" : "text-secondary hover:bg-surface-variant/20 hover:text-primary"
             }`}
           >
             <Database className="w-4 h-4" />
@@ -400,8 +400,8 @@ export default function AdminDashboardClient({
           
           <button
             onClick={() => { setActiveTab("buildings"); setIsEditingBuilding(false); setIsEditingRef(false); }}
-            className={`w-full p-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 active:scale-95 ${
-              activeTab === "buildings" ? "bg-primary text-white shadow-md" : "text-secondary hover:bg-surface-variant/20"
+            className={`p-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 active:scale-95 whitespace-nowrap flex-shrink-0 md:w-full ${
+              activeTab === "buildings" ? "bg-primary text-white shadow-md" : "text-secondary hover:bg-surface-variant/20 hover:text-primary"
             }`}
           >
             <Building className="w-4 h-4" />
@@ -410,8 +410,8 @@ export default function AdminDashboardClient({
           
           <button
             onClick={() => { setActiveTab("references"); setIsEditingBuilding(false); setIsEditingRef(false); }}
-            className={`w-full p-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 active:scale-95 ${
-              activeTab === "references" ? "bg-primary text-white shadow-md" : "text-secondary hover:bg-surface-variant/20"
+            className={`p-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 active:scale-95 whitespace-nowrap flex-shrink-0 md:w-full ${
+              activeTab === "references" ? "bg-primary text-white shadow-md" : "text-secondary hover:bg-surface-variant/20 hover:text-primary"
             }`}
           >
             <Compass className="w-4 h-4" />
@@ -420,8 +420,8 @@ export default function AdminDashboardClient({
 
           <button
             onClick={() => { setActiveTab("categories"); setIsEditingBuilding(false); setIsEditingRef(false); }}
-            className={`w-full p-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 active:scale-95 ${
-              activeTab === "categories" ? "bg-primary text-white shadow-md" : "text-secondary hover:bg-surface-variant/20"
+            className={`p-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 active:scale-95 whitespace-nowrap flex-shrink-0 md:w-full ${
+              activeTab === "categories" ? "bg-primary text-white shadow-md" : "text-secondary hover:bg-surface-variant/20 hover:text-primary"
             }`}
           >
             <FolderOpen className="w-4 h-4" />
@@ -430,19 +430,19 @@ export default function AdminDashboardClient({
 
           <button
             onClick={() => { setActiveTab("settings"); setIsEditingBuilding(false); setIsEditingRef(false); }}
-            className={`w-full p-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 active:scale-95 ${
-              activeTab === "settings" ? "bg-primary text-white shadow-md" : "text-secondary hover:bg-surface-variant/20"
+            className={`p-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 active:scale-95 whitespace-nowrap flex-shrink-0 md:w-full ${
+              activeTab === "settings" ? "bg-primary text-white shadow-md" : "text-secondary hover:bg-surface-variant/20 hover:text-primary"
             }`}
           >
             <Settings className="w-4 h-4" />
             <span>Dashboard Settings</span>
           </button>
 
-          <div className="border-t border-outline-variant/10 my-2 pt-2" />
+          <div className="hidden md:block border-t border-outline-variant/10 my-2 pt-2" />
 
           <button
             onClick={handleLogout}
-            className="w-full p-3 rounded-xl text-xs font-bold text-red-500 hover:bg-red-500/10 transition-all flex items-center gap-3 active:scale-95"
+            className="p-3 rounded-xl text-xs font-bold text-red-500 hover:bg-red-500/10 transition-all flex items-center gap-3 active:scale-95 whitespace-nowrap flex-shrink-0 md:w-full"
           >
             <LogOut className="w-4 h-4" />
             <span>{t("logout")}</span>
@@ -769,8 +769,8 @@ export default function AdminDashboardClient({
                   />
                 </div>
 
-                <div className="bg-surface-lowest border border-outline-variant/10 rounded-2xl overflow-hidden shadow-sm">
-                  <table className="w-full text-xs text-left text-secondary border-collapse">
+                <div className="bg-surface-lowest border border-outline-variant/10 rounded-2xl overflow-hidden shadow-sm overflow-x-auto">
+                  <table className="w-full text-xs text-left text-secondary border-collapse min-w-[700px]">
                     <thead>
                       <tr className="bg-surface-container/30 border-b border-outline-variant/5 text-on-surface font-bold">
                         <th className="p-3.5">ID</th>
@@ -1036,8 +1036,8 @@ export default function AdminDashboardClient({
                   />
                 </div>
 
-                <div className="bg-surface-lowest border border-outline-variant/10 rounded-2xl overflow-hidden shadow-sm">
-                  <table className="w-full text-xs text-left text-secondary border-collapse">
+                <div className="bg-surface-lowest border border-outline-variant/10 rounded-2xl overflow-hidden shadow-sm overflow-x-auto">
+                  <table className="w-full text-xs text-left text-secondary border-collapse min-w-[700px]">
                     <thead>
                       <tr className="bg-surface-container/30 border-b border-outline-variant/5 text-on-surface font-bold">
                         <th className="p-3.5">Reference Name</th>

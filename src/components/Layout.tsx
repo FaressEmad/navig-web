@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "../hooks/useStore";
 import { useTranslation } from "../hooks/useTranslation";
+import { CampusBoundaryService } from "../services/campusBoundary";
 import { 
   Compass, 
   Search, 
@@ -27,10 +28,23 @@ export default function Layout({ children }: LayoutProps) {
   const { language, setLanguage, theme, toggleTheme, setTheme } = useStore();
   const { t } = useTranslation();
 
+  const setBoundaryGeoJSON = useStore((state) => state.setBoundaryGeoJSON);
+
   // Initialize theme from store on mount
   useEffect(() => {
     setTheme(theme);
   }, [theme, setTheme]);
+
+  // Load Cairo University boundaries GeoJSON on startup using CampusBoundaryService
+  useEffect(() => {
+    CampusBoundaryService.loadBoundary()
+      .then((data) => {
+        setBoundaryGeoJSON(data);
+      })
+      .catch((err) => {
+        console.error("Error loading boundary GeoJSON:", err);
+      });
+  }, [setBoundaryGeoJSON]);
 
   const isRtl = language === "ar";
   const dir = isRtl ? "rtl" : "ltr";

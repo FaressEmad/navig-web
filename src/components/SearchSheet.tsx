@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useMemo } from "react";
 import { useStore } from "../hooks/useStore";
 import { useTranslation } from "../hooks/useTranslation";
 import { Place } from "../types";
 import { generateRoute } from "../services/routing";
+import { CampusBoundaryService } from "../services/campusBoundary";
 import { 
   Search, 
   MapPin, 
@@ -36,7 +37,8 @@ export default function SearchSheet({ places }: SearchSheetProps) {
     setDestinationPlace,
     setIsNavigating,
     setActiveRoute,
-    userLocation
+    userLocation,
+    boundaryGeoJSON
   } = useStore();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,32 +53,36 @@ export default function SearchSheet({ places }: SearchSheetProps) {
     { id: "OFFICE", label: t("catOffices"), icon: Building },
   ];
 
-  // Filtering places list based on search query, category, and fuzzy aliases matching
-  const filteredPlaces = places.filter((place) => {
-    const name = language === "en" ? place.nameEn : place.nameAr;
-    const desc = (language === "en" ? place.descriptionEn : place.descriptionAr) || "";
-    const displayNameAr = place.displayNameAr || "";
-    
-    // Fuzzy search through aliases array
-    const aliases = place.aliases ? place.aliases.toLowerCase().split(",") : [];
-    const matchesAliases = aliases.some(alias => alias.trim().includes(searchQuery.toLowerCase()));
+  // Filtering places list based on search query, category, boundary, and fuzzy aliases matching
+  const filteredPlaces = useMemo(() => {
+    return places.filter((place) => {
+      // 1. Category check
+      if (selectedCategory && place.type !== selectedCategory) return false;
 
-    const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          displayNameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          matchesAliases;
-    
-    const matchesCategory = !selectedCategory || place.type === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
+      // 2. Boundary check using CampusBoundaryService (must be inside campus boundary)
+      if (!CampusBoundaryService.isInsideCampus(place.latitude, place.longitude)) return false;
+
+      // 3. Search query check
+      const name = language === "en" ? place.nameEn : place.nameAr;
+      const desc = (language === "en" ? place.descriptionEn : place.descriptionAr) || "";
+      const displayNameAr = place.displayNameAr || "";
+      
+      const aliases = place.aliases ? place.aliases.toLowerCase().split(",") : [];
+      const matchesAliases = aliases.some(alias => alias.trim().includes(searchQuery.toLowerCase()));
+
+      return name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+             displayNameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+             desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
+             matchesAliases;
+    });
+  }, [places, searchQuery, selectedCategory, language, boundaryGeoJSON]);
 
   const handleSelectPlace = (place: Place) => {
     setSelectedPlace(place);
     setIsSearchFocused(false);
   };
 
-  const handleQuickNav = (place: Place, e: React.MouseEvent) => {
+  const handleQuickNav = async (place: Place, e: React.MouseEvent) => {
     e.stopPropagation();
     
     const currentLoc = userLocation;
@@ -105,9 +111,7 @@ export default function SearchSheet({ places }: SearchSheetProps) {
     setDestinationPlace(place);
     setSelectedPlace(place);
     
-    const nodes = useStore.getState().nodes;
-    const edges = useStore.getState().edges;
-    const route = generateRoute(startPoint, place, nodes, edges);
+    const route = await generateRoute(startPoint, place);
     
     if (route) {
       setActiveRoute(route);
