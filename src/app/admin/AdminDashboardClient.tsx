@@ -108,9 +108,9 @@ export default function AdminDashboardClient({
   // Fetch updated list of places from SQLite endpoints
   const refreshPlaces = async () => {
     try {
-      const res = await fetch("/api/admin/buildings");
+      const res = await fetch(`/api/admin/buildings?t=${Date.now()}`, { cache: "no-store" });
       const buildings: Place[] = await res.json();
-      const res2 = await fetch("/api/admin/references");
+      const res2 = await fetch(`/api/admin/references?t=${Date.now()}`, { cache: "no-store" });
       const references: Place[] = await res2.json();
       setPlaces([...buildings, ...references]);
     } catch (err) {

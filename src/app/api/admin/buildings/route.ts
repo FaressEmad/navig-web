@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/database/db";
 
+export const dynamic = "force-dynamic";
+
 // GET: Retrieve all buildings (places that are faculty buildings or don't have a parent buildingId)
 export async function GET() {
   try {
@@ -58,8 +60,20 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, nameEn, nameAr, displayNameAr, aliases, descriptionEn, descriptionAr, type, latitude, longitude } = body;
 
+    console.log(`[API Buildings PUT] Received ID to update: "${id}"`);
+
     if (!id) {
       return NextResponse.json({ error: "Missing building ID" }, { status: 400 });
+    }
+
+    // Check if the building exists
+    const existing = await prisma.place.findUnique({
+      where: { id }
+    });
+
+    if (!existing) {
+      console.log(`[API Buildings PUT] Building not found in database for ID: "${id}"`);
+      return NextResponse.json({ error: `Building with ID "${id}" not found.` }, { status: 404 });
     }
 
     const updated = await prisma.place.update({
@@ -79,6 +93,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updated);
   } catch (error: any) {
+    console.error("[API Buildings PUT] Error updating building:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

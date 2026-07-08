@@ -117,12 +117,6 @@ export default function LoginPage() {
               {!loading && <ArrowRight className="w-4 h-4" />}
             </button>
 
-            {/* Help micro-copy */}
-            <div className="text-center pt-2">
-              <span className="text-[10px] text-secondary font-medium italic">
-                Authorized accounts: Use <strong>DrHeba</strong> / <strong>Cairouninavi</strong> or <strong>Fares</strong> / <strong>realowner</strong>
-              </span>
-            </div>
 
           </form>
 

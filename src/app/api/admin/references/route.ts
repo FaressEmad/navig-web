@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/database/db";
 
+export const dynamic = "force-dynamic";
+
 // GET: Retrieve all references (places that have a parent buildingId)
 export async function GET() {
   try {
@@ -58,8 +60,20 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, nameEn, nameAr, displayNameAr, aliases, descriptionEn, descriptionAr, type, latitude, longitude, floor, roomNumber, buildingId } = body;
 
+    console.log(`[API References PUT] Received ID to update: "${id}"`);
+
     if (!id) {
       return NextResponse.json({ error: "Missing reference ID" }, { status: 400 });
+    }
+
+    // Check if the reference exists
+    const existing = await prisma.place.findUnique({
+      where: { id }
+    });
+
+    if (!existing) {
+      console.log(`[API References PUT] Reference not found in database for ID: "${id}"`);
+      return NextResponse.json({ error: `Reference with ID "${id}" not found.` }, { status: 404 });
     }
 
     const updated = await prisma.place.update({
@@ -82,6 +96,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(updated);
   } catch (error: any) {
+    console.error("[API References PUT] Error updating reference:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -55,6 +55,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, username: admin.username });
   } catch (error: any) {
     console.error("[Login API] Exception during login flow:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    
+    // Check for Prisma connection/network timeout errors (P1001, P1003, or message patterns)
+    const isConnectionError = 
+      error.message?.includes("Can't reach database server") || 
+      error.code === "P1001" || 
+      error.code === "P1003";
+      
+    const userMessage = isConnectionError 
+      ? "Database is waking up from standby. Please wait a few seconds and try again."
+      : "An internal server error occurred. Please try again.";
+
+    return NextResponse.json({ error: userMessage }, { status: 500 });
   }
 }
