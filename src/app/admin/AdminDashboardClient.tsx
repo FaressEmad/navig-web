@@ -24,7 +24,8 @@ import {
   FileSpreadsheet,
   CheckCircle,
   AlertTriangle,
-  HelpCircle
+  HelpCircle,
+  ChevronDown
 } from "lucide-react";
 
 interface AdminDashboardClientProps {
@@ -92,6 +93,7 @@ export default function AdminDashboardClient({
   const [importStatus, setImportStatus] = useState<{ type: "success" | "error" | null, message: string }>({ type: null, message: "" });
   const [importType, setImportType] = useState<"buildings" | "references">("buildings");
   const [csvText, setCsvText] = useState("");
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
   // Verify session authorization
   useEffect(() => {
@@ -113,6 +115,7 @@ export default function AdminDashboardClient({
       const res2 = await fetch(`/api/admin/references?t=${Date.now()}`, { cache: "no-store" });
       const references: Place[] = await res2.json();
       setPlaces([...buildings, ...references]);
+      router.refresh();
     } catch (err) {
       console.error("Refresh failed: ", err);
     }
@@ -1091,18 +1094,79 @@ export default function AdminDashboardClient({
               <p className="text-xs text-secondary mt-1">Review campus classifications indexes.</p>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4 items-start">
               {placeCategories.map((cat) => {
-                const count = places.filter(p => p.type === cat.value).length;
+                const catPlaces = places.filter(p => p.type === cat.value);
+                const count = catPlaces.length;
+                const isExpanded = expandedCategory === cat.value;
                 return (
-                  <div key={cat.value} className="p-5 bg-surface-lowest border border-outline-variant/10 rounded-2xl shadow-sm flex items-center justify-between">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-bold text-sm text-on-surface">{cat.label}</span>
-                      <span className="text-[10px] text-secondary font-mono uppercase">{cat.value}</span>
+                  <div 
+                    key={cat.value} 
+                    onClick={() => setExpandedCategory(isExpanded ? null : cat.value)}
+                    className="p-5 bg-surface-lowest border border-outline-variant/10 rounded-2xl shadow-sm flex flex-col cursor-pointer hover:border-primary/20 transition-all duration-300"
+                  >
+                    {/* Header Row */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col gap-1 text-left">
+                        <span className="font-bold text-sm text-on-surface">{cat.label}</span>
+                        <span className="text-[10px] text-secondary font-mono uppercase">{cat.value}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="bg-primary/10 text-primary px-3 py-1.5 rounded-xl font-black text-xs">
+                          {count} {count === 1 ? "item" : "items"}
+                        </span>
+                        <ChevronDown className={`w-4 h-4 text-secondary transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`} />
+                      </div>
                     </div>
-                    <span className="bg-primary/10 text-primary px-3 py-1.5 rounded-xl font-black text-xs">
-                      {count} items
-                    </span>
+
+                    {/* Expandable Items List */}
+                    {isExpanded && (
+                      <div className="mt-4 pt-4 border-t border-outline-variant/10 flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
+                        {catPlaces.length === 0 ? (
+                          <span className="text-xs text-secondary italic text-left py-2">
+                            No locations indexed in this category.
+                          </span>
+                        ) : (
+                          catPlaces.map((place) => (
+                            <div 
+                              key={place.id} 
+                              onClick={(e) => e.stopPropagation()} // Prevent toggling expansion when clicking on the row
+                              className="flex justify-between items-center bg-surface-container/20 p-2.5 rounded-xl border border-outline-variant/5 text-xs hover:border-primary/20 transition-all"
+                            >
+                              <div className="flex flex-col text-left max-w-[70%]">
+                                <span className="font-bold text-on-surface truncate">{place.nameEn}</span>
+                                <span className="text-[10px] text-secondary truncate">
+                                  {place.nameAr} {place.displayNameAr ? `(${place.displayNameAr})` : ""}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                {place.buildingId && (
+                                  <span className="text-[9px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-black uppercase">
+                                    Room
+                                  </span>
+                                )}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (place.buildingId === null) {
+                                      setActiveTab("buildings");
+                                      handleEditBuildingClick(place);
+                                    } else {
+                                      setActiveTab("references");
+                                      handleEditRefClick(place);
+                                    }
+                                  }}
+                                  className="p-1.5 hover:bg-primary/10 text-primary rounded-lg transition-all active:scale-95 cursor-pointer"
+                                  title="Edit Location"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}

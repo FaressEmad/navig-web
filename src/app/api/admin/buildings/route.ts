@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import prisma from "@/database/db";
 import crypto from "crypto";
 
@@ -51,6 +52,11 @@ export async function POST(request: Request) {
       }
     });
 
+    revalidatePath("/");
+    revalidatePath("/search");
+    revalidatePath("/navigation");
+    revalidatePath("/directory");
+
     return NextResponse.json(building, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -94,6 +100,20 @@ export async function PUT(request: Request) {
       }
     });
 
+    // Automatically propagate the updated coordinates to all child references (rooms/labs) inside this building
+    await prisma.place.updateMany({
+      where: { buildingId: id },
+      data: {
+        latitude,
+        longitude
+      }
+    });
+
+    revalidatePath("/");
+    revalidatePath("/search");
+    revalidatePath("/navigation");
+    revalidatePath("/directory");
+
     return NextResponse.json(updated);
   } catch (error: any) {
     console.error("[API Buildings PUT] Error updating building:", error);
@@ -129,6 +149,13 @@ export async function DELETE(request: Request) {
     await prisma.place.delete({
       where: { id }
     });
+
+    revalidatePath("/");
+    revalidatePath("/search");
+    revalidatePath("/navigation");
+    revalidatePath("/directory");
+
+    return NextResponse.json({ success: true });
 
   } catch (error: any) {
     console.error("[API Buildings DELETE] Error deleting building:", error);

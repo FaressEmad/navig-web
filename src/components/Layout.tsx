@@ -68,7 +68,7 @@ export default function Layout({ children }: LayoutProps) {
         <Link href="/" className="flex items-center gap-3 select-none hover:opacity-90 transition-opacity">
           <div className="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center shadow-sm flex-shrink-0 border border-outline-variant/10">
             <img 
-              src="/images/cairo_university_logo.png" 
+              src="/images/cairo_university_logo.jpg" 
               alt="Cairo University Logo" 
               className="w-full h-full object-contain"
             />
