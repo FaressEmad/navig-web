@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/database/db";
+import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
 
@@ -24,11 +25,16 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { id, nameEn, nameAr, displayNameAr, aliases, descriptionEn, descriptionAr, type, latitude, longitude, floor, roomNumber, buildingId } = body;
+    const { nameEn, nameAr, displayNameAr, aliases, descriptionEn, descriptionAr, type, latitude, longitude, floor, roomNumber, buildingId } = body;
 
-    if (!id || !nameEn || !nameAr || !type || !buildingId || latitude === undefined || longitude === undefined) {
+    if (!nameEn || !nameAr || !type || !buildingId || latitude === undefined || longitude === undefined) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
+
+    const id = crypto.randomUUID();
+
+    const parsedFloor = (floor !== undefined && floor !== null && floor !== "") ? parseInt(floor) : null;
+    const safeFloor = (parsedFloor !== null && isNaN(parsedFloor)) ? null : parsedFloor;
 
     const reference = await prisma.place.create({
       data: {
@@ -42,7 +48,7 @@ export async function POST(request: Request) {
         type,
         latitude,
         longitude,
-        floor: floor !== null ? parseInt(floor) : null,
+        floor: safeFloor,
         roomNumber,
         buildingId
       }
@@ -76,6 +82,9 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: `Reference with ID "${id}" not found.` }, { status: 404 });
     }
 
+    const parsedFloor = (floor !== undefined && floor !== null && floor !== "") ? parseInt(floor) : null;
+    const safeFloor = (parsedFloor !== null && isNaN(parsedFloor)) ? null : parsedFloor;
+
     const updated = await prisma.place.update({
       where: { id },
       data: {
@@ -88,7 +97,7 @@ export async function PUT(request: Request) {
         type,
         latitude,
         longitude,
-        floor: floor !== null ? parseInt(floor) : null,
+        floor: safeFloor,
         roomNumber,
         buildingId
       }
@@ -111,12 +120,22 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Missing reference ID" }, { status: 400 });
     }
 
+    // Check if the reference exists
+    const existing = await prisma.place.findUnique({
+      where: { id }
+    });
+
+    if (!existing) {
+      console.log(`[API References DELETE] Reference with ID "${id}" not found. No-op.`);
+      return NextResponse.json({ error: `Reference with ID "${id}" not found.` }, { status: 404 });
+    }
+
     await prisma.place.delete({
       where: { id }
     });
 
-    return NextResponse.json({ success: true });
   } catch (error: any) {
+    console.error("[API References DELETE] Error deleting reference:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

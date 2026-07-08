@@ -138,7 +138,7 @@ const translations = {
     manageHalls: "Manage Lecture Halls",
     manageWaypoints: "Edit Routing Network",
     quickStats: "System Health Overview",
-    dbStatus: "SQLite Database: Connected (Local Dev)",
+    dbStatus: "Neon PostgreSQL Database: Connected (Serverless)",
   },
   ar: {
     // Navigation
@@ -277,7 +277,7 @@ const translations = {
     manageHalls: "المدرجات والقاعات",
     manageWaypoints: "شبكة المسارات والطرق",
     quickStats: "نظرة سريعة على حالة النظام",
-    dbStatus: "قاعدة البيانات SQLite: متصلة وشغالة بنجاح",
+    dbStatus: "قاعدة البيانات Neon PostgreSQL: متصلة وشغالة بنجاح",
   },
 };
 

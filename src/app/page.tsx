@@ -123,20 +123,27 @@ export default function LandingPage() {
               className="relative w-full max-w-[320px] aspect-[9/19] bg-slate-950 p-2.5 rounded-[2.5rem] border-[6px] border-slate-900 shadow-2xl overflow-hidden flex flex-col select-none"
             >
               {/* Phone screen mockup */}
-              <div className="w-full h-full bg-slate-50 rounded-[2rem] overflow-hidden flex flex-col relative">
-                {/* Visual Map rendering */}
-                <div className="absolute inset-0 bg-slate-100/50 flex flex-col justify-between p-4 bg-cover bg-center" style={{ backgroundImage: "url('/images/campus_navigation_bg.png')" }}>
+              <div className="w-full h-full bg-slate-50 dark:bg-slate-900 rounded-[2rem] overflow-hidden flex flex-col relative transition-colors duration-300">
+                {/* Visual Map rendering background */}
+                <div 
+                  className="absolute inset-0 bg-slate-100/50 dark:bg-slate-900/50 bg-cover bg-center transition-all duration-300 dark:invert-[0.85] dark:hue-rotate-180 dark:brightness-[0.7]" 
+                  style={{ backgroundImage: "url('/images/campus_navigation_bg.png')" }} 
+                />
+                
+                {/* Content Overlay */}
+                <div className="absolute inset-0 flex flex-col justify-between p-4 z-10">
                   {/* Top search overlay */}
-                  <div className="w-full bg-white/95 backdrop-blur-md p-3.5 rounded-2xl shadow-lg border border-slate-150 flex flex-col gap-2 mt-4">
-                    <div className="flex items-center gap-2 bg-slate-100 p-2 rounded-lg">
+                  <div className="w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-3.5 rounded-2xl shadow-lg border border-slate-150 dark:border-slate-800/80 flex flex-col gap-2 mt-4 transition-colors">
+                    <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800/70 p-2 rounded-lg transition-colors">
                       <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <span className="text-[10px] font-bold text-slate-700">Main Gate (Gate 1)</span>
+                      <span className="text-[10px] font-bold text-slate-700 dark:text-slate-350">Main Gate (Gate 1)</span>
                     </div>
-                    <div className="flex items-center gap-2 bg-slate-100 p-2 rounded-lg">
+                    <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800/70 p-2 rounded-lg transition-colors">
                       <div className="w-2 h-2 rounded-full bg-primary" />
-                      <span className="text-[10px] font-bold text-slate-900">Shora Lecture Hall</span>
+                      <span className="text-[10px] font-bold text-slate-900 dark:text-slate-100">Shora Lecture Hall</span>
                     </div>
                   </div>
+
                   {/* Center pin icon with graduation cap */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="relative flex flex-col items-center justify-center -mt-6">
@@ -144,7 +151,7 @@ export default function LandingPage() {
                       <div className="absolute w-12 h-12 bg-primary/20 rounded-full animate-ping opacity-75" />
                       
                       {/* Map Pin base shadow */}
-                      <div className="absolute bottom-[-6px] w-8 h-2.5 bg-black/15 rounded-full blur-[1px]" />
+                      <div className="absolute bottom-[-6px] w-8 h-2.5 bg-black/15 dark:bg-black/35 rounded-full blur-[1px]" />
                       
                       {/* The Pin container */}
                       <div className="relative z-10 w-16 h-16 drop-shadow-xl flex items-center justify-center animate-bounce duration-1000">
@@ -159,7 +166,7 @@ export default function LandingPage() {
                             strokeLinejoin="round" 
                           />
                           {/* Inner circle wrapper */}
-                          <circle cx="50" cy="38" r="21" fill="#ffffff" stroke="#ba0034" strokeWidth="2.5" />
+                          <circle cx="50" cy="38" r="21" className="fill-white dark:fill-slate-900 transition-colors duration-300" stroke="#ba0034" strokeWidth="2.5" />
                           
                           {/* SVG Gradients definitions */}
                           <defs>
@@ -170,7 +177,7 @@ export default function LandingPage() {
                           </defs>
                         </svg>
                         
-                        {/* Lucide GraduationCap React Component placed inside the white circle */}
+                        {/* Lucide GraduationCap React Component placed inside the circle */}
                         <div className="absolute top-[38%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[34%] h-[34%] text-primary flex items-center justify-center">
                           <GraduationCap className="w-full h-full stroke-[2.2]" />
                         </div>
@@ -179,17 +186,17 @@ export default function LandingPage() {
                   </div>
 
                   {/* Navigation steps prompt */}
-                  <div className="w-full bg-white p-3.5 rounded-2xl shadow-xl border border-slate-100 flex items-center justify-between mb-2">
+                  <div className="w-full bg-white dark:bg-slate-900 p-3.5 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between mb-2 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                         <Compass className="w-4 h-4" />
                       </div>
                       <div className="text-left">
-                        <h4 className="text-[11px] font-black text-slate-900">Turn Right in 50m</h4>
-                        <p className="text-[9px] text-slate-500">Toward Engineering Bldg 3</p>
+                        <h4 className="text-[11px] font-black text-slate-900 dark:text-slate-100">Turn Right in 50m</h4>
+                        <p className="text-[9px] text-slate-500 dark:text-slate-400">Toward Engineering Bldg 3</p>
                       </div>
                     </div>
-                    <span className="text-[10px] font-black bg-slate-100 px-2 py-1 rounded">2 min</span>
+                    <span className="text-[10px] font-black bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-1 rounded transition-colors">2 min</span>
                   </div>
                 </div>
               </div>

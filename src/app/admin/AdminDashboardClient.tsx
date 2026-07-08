@@ -105,7 +105,7 @@ export default function AdminDashboardClient({
     }
   }, [router]);
 
-  // Fetch updated list of places from SQLite endpoints
+  // Fetch updated list of places from PostgreSQL endpoints
   const refreshPlaces = async () => {
     try {
       const res = await fetch(`/api/admin/buildings?t=${Date.now()}`, { cache: "no-store" });
@@ -136,7 +136,7 @@ export default function AdminDashboardClient({
     e.preventDefault();
     try {
       const url = "/api/admin/buildings";
-      const method = isEditingBuilding ? "PUT" : "POST";
+      const method = selectedBuildingId ? "PUT" : "POST";
 
       const res = await fetch(url, {
         method,
@@ -225,7 +225,7 @@ export default function AdminDashboardClient({
       };
 
       const url = "/api/admin/references";
-      const method = isEditingRef ? "PUT" : "POST";
+      const method = selectedRefId ? "PUT" : "POST";
 
       const res = await fetch(url, {
         method,
@@ -604,18 +604,17 @@ export default function AdminDashboardClient({
                 </h3>
 
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-secondary uppercase pl-1">Unique ID</label>
-                    <input
-                      type="text"
-                      required
-                      disabled={selectedBuildingId !== null}
-                      value={buildingForm.id}
-                      onChange={(e) => setBuildingForm({ ...buildingForm, id: e.target.value })}
-                      className="bg-surface-container border border-outline-variant/10 rounded-xl p-2.5 text-xs text-on-surface outline-none disabled:opacity-50"
-                      placeholder="e.g. engineering-dome"
-                    />
-                  </div>
+                  {selectedBuildingId && (
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-secondary uppercase pl-1">Unique ID</label>
+                      <input
+                        type="text"
+                        disabled
+                        value={buildingForm.id}
+                        className="bg-surface-container border border-outline-variant/10 rounded-xl p-2.5 text-xs text-on-surface outline-none disabled:opacity-50"
+                      />
+                    </div>
+                  )}
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] font-bold text-secondary uppercase pl-1">Building Type</label>
@@ -862,18 +861,17 @@ export default function AdminDashboardClient({
                 </h3>
 
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-secondary uppercase pl-1">Unique ID</label>
-                    <input
-                      type="text"
-                      required
-                      disabled={selectedRefId !== null}
-                      value={refForm.id}
-                      onChange={(e) => setRefForm({ ...refForm, id: e.target.value })}
-                      className="bg-surface-container border border-outline-variant/10 rounded-xl p-2.5 text-xs text-on-surface outline-none disabled:opacity-50"
-                      placeholder="e.g. sci-hall-shora"
-                    />
-                  </div>
+                  {selectedRefId && (
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-secondary uppercase pl-1">Unique ID</label>
+                      <input
+                        type="text"
+                        disabled
+                        value={refForm.id}
+                        className="bg-surface-container border border-outline-variant/10 rounded-xl p-2.5 text-xs text-on-surface outline-none disabled:opacity-50"
+                      />
+                    </div>
+                  )}
 
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] font-bold text-secondary uppercase pl-1">Category Type</label>
@@ -1148,7 +1146,7 @@ export default function AdminDashboardClient({
 
               <div className="flex justify-between items-center py-2.5">
                 <div>
-                  <h4 className="font-bold text-xs text-on-surface">SQLite Dev Database Health</h4>
+                  <h4 className="font-bold text-xs text-on-surface">Neon PostgreSQL Database Health</h4>
                   <p className="text-[10px] text-secondary mt-0.5">Synchronized via Prisma ORM client</p>
                 </div>
                 <span className="text-[10px] font-black bg-emerald-500/10 text-emerald-500 px-2.5 py-1 rounded-full">

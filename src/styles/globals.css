@@ -42,10 +42,10 @@
     --background: #191c1e;
     --on-background: #e1e2e5;
     
-    --primary: #ffb3b5;
-    --on-primary: #680018;
+    --primary: #e51245; /* Vibrant brand red for dark mode */
+    --on-primary: #ffffff;
     --primary-container: #ba0034;
-    --on-primary-container: #ffdada;
+    --on-primary-container: #ffffff;
     
     --secondary: #aec7f6;
     --on-secondary: #143057;

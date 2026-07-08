@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/database/db";
+import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
 
@@ -27,11 +28,13 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { id, nameEn, nameAr, displayNameAr, aliases, descriptionEn, descriptionAr, type, latitude, longitude } = body;
+    const { nameEn, nameAr, displayNameAr, aliases, descriptionEn, descriptionAr, type, latitude, longitude } = body;
 
-    if (!id || !nameEn || !nameAr || !type || latitude === undefined || longitude === undefined) {
+    if (!nameEn || !nameAr || !type || latitude === undefined || longitude === undefined) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
+
+    const id = crypto.randomUUID();
 
     const building = await prisma.place.create({
       data: {
@@ -108,6 +111,16 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Missing building ID" }, { status: 400 });
     }
 
+    // Check if the building exists
+    const existing = await prisma.place.findUnique({
+      where: { id }
+    });
+
+    if (!existing) {
+      console.log(`[API Buildings DELETE] Building with ID "${id}" not found. No-op.`);
+      return NextResponse.json({ error: `Building with ID "${id}" not found.` }, { status: 404 });
+    }
+
     // First delete any references inside this building to maintain database integrity
     await prisma.place.deleteMany({
       where: { buildingId: id }
@@ -117,8 +130,8 @@ export async function DELETE(request: Request) {
       where: { id }
     });
 
-    return NextResponse.json({ success: true });
   } catch (error: any) {
+    console.error("[API Buildings DELETE] Error deleting building:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
