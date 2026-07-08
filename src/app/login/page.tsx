@@ -14,24 +14,33 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    // Mock Authentication Logic (Admins only, username: admin, password: admin123)
-    setTimeout(() => {
-      if (username === "admin" && password === "admin123") {
-        // Set a mock session in local storage for navigation guards
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
         if (typeof window !== "undefined") {
           localStorage.setItem("cu_navigate_admin_session", "true");
         }
         router.push("/admin");
       } else {
-        setError(t("loginError"));
+        setError(data.error || t("loginError"));
         setLoading(false);
       }
-    }, 800);
+    } catch (err) {
+      setError(t("loginError"));
+      setLoading(false);
+    }
   };
 
   return (
@@ -111,7 +120,7 @@ export default function LoginPage() {
             {/* Help micro-copy */}
             <div className="text-center pt-2">
               <span className="text-[10px] text-secondary font-medium italic">
-                Demo accounts: Use <strong>admin</strong> / <strong>admin123</strong>
+                Authorized accounts: Use <strong>DrHeba</strong> / <strong>Cairouninavi</strong> or <strong>Fares</strong> / <strong>realowner</strong>
               </span>
             </div>
 

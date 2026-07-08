@@ -1,6 +1,11 @@
 import { PrismaClient } from "@prisma/client";
+import crypto from "crypto";
 
 const prisma = new PrismaClient();
+
+function hashPassword(password: string): string {
+  return crypto.createHash("sha256").update(password).digest("hex");
+}
 
 async function main() {
   console.log("Seeding Cairo University database...");
@@ -12,15 +17,22 @@ async function main() {
   await prisma.faculty.deleteMany();
   await prisma.admin.deleteMany();
 
-  // 2. Seed Administrator credentials (login username: admin, password: admin123)
+  // 2. Seed Administrator credentials (DrHeba and Fares)
   await prisma.admin.create({
     data: {
-      username: "admin",
-      passwordHash: "$2a$10$XmFhL56m1234567890abcdef.abcdefghijklmnopqrstuvwxyza", // bcrypt mock hash representation
+      username: "DrHeba",
+      passwordHash: hashPassword("Cairouninavi"),
     },
   });
 
-  console.log("Admin account seeded.");
+  await prisma.admin.create({
+    data: {
+      username: "Fares",
+      passwordHash: hashPassword("realowner"),
+    },
+  });
+
+  console.log("Admin accounts seeded.");
 
   // 3. Seed the 11 official Cairo University buildings
   const placesData = [
