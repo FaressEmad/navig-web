@@ -59,6 +59,9 @@ export default function NavigationPageClient({ places, nodes, edges }: Navigatio
   const [userIndoorPos, setUserIndoorPos] = useState<{ x: number, y: number } | null>(null);
   const [indoorLanguage, setIndoorLanguage] = useState<"en" | "ar">("en");
   const [isLoadingMaps, setIsLoadingMaps] = useState(false);
+  
+  // Routing error state for non-blocking UI alert
+  const [routeError, setRouteError] = useState<string | null>(null);
 
   // Sync indoor language preference with app language initial setup
   useEffect(() => {
@@ -179,9 +182,40 @@ export default function NavigationPageClient({ places, nodes, edges }: Navigatio
             buildingId: null,
           };
 
-          const route = await generateRoute(startPoint, destinationPlace);
+          const route = await generateRoute(startPoint, destinationPlace, true);
           if (route) {
             setActiveRoute(route);
+            setCurrentStepIndex(0);
+            setRouteError(null);
+          } else {
+            // Set local route error message
+            const isStartInside = CampusBoundaryService.isInsideCampus(lat, lng);
+            if (!isStartInside) {
+              setRouteError(language === "en" 
+                ? "Your current GPS location is outside Cairo University boundary." 
+                : "موقعك الجغرافي الحالي خارج حدود جامعة القاهرة.");
+            } else {
+              setRouteError(language === "en"
+                ? "Unable to calculate a campus-only walking route."
+                : "تعذر حساب مسار مشي داخل الحرم الجامعي فقط.");
+            }
+
+            // Fallback straight-line route from current location to destination
+            // This resets the user back onto the active route path, stopping the infinite recalculation loop
+            const dist = Math.round(getHaversineDistance(lat, lng, destinationPlace.latitude, destinationPlace.longitude));
+            setActiveRoute({
+              path: [[lat, lng], [destinationPlace.latitude, destinationPlace.longitude]],
+              distance: dist,
+              duration: Math.max(1, Math.round(dist / 1.3 / 60)),
+              instructions: [
+                {
+                  instructionEn: `Walk towards ${destinationPlace.nameEn || "destination"}`,
+                  instructionAr: `امشِ باتجاه ${destinationPlace.nameAr || "الوجهة"}`,
+                  distance: dist,
+                  coordinate: [destinationPlace.latitude, destinationPlace.longitude]
+                }
+              ]
+            });
             setCurrentStepIndex(0);
           }
           lastLocation = newLoc;
@@ -225,9 +259,27 @@ export default function NavigationPageClient({ places, nodes, edges }: Navigatio
             buildingId: null,
           };
 
-          const route = await generateRoute(startPoint, destinationPlace);
+          const route = await generateRoute(startPoint, destinationPlace, true);
           if (route) {
             setActiveRoute(route);
+            setCurrentStepIndex(0);
+            setRouteError(null);
+          } else {
+            // Also fall back to a straight line route if standard recalculation fails
+            const dist = Math.round(getHaversineDistance(lat, lng, destinationPlace.latitude, destinationPlace.longitude));
+            setActiveRoute({
+              path: [[lat, lng], [destinationPlace.latitude, destinationPlace.longitude]],
+              distance: dist,
+              duration: Math.max(1, Math.round(dist / 1.3 / 60)),
+              instructions: [
+                {
+                  instructionEn: `Walk towards ${destinationPlace.nameEn || "destination"}`,
+                  instructionAr: `امشِ باتجاه ${destinationPlace.nameAr || "الوجهة"}`,
+                  distance: dist,
+                  coordinate: [destinationPlace.latitude, destinationPlace.longitude]
+                }
+              ]
+            });
             setCurrentStepIndex(0);
           }
         }
@@ -252,7 +304,7 @@ export default function NavigationPageClient({ places, nodes, edges }: Navigatio
         watchIdRef.current = null;
       }
     };
-  }, [destinationPlace, isNavigating, nodes, edges, activeRoute, language, isMapReady, setActiveRoute, setCurrentStepIndex, setUserLocation, setCurrentUserLocation, setUserHeading, setAutoFollowEnabled, router]);
+  }, [destinationPlace, isNavigating, nodes, edges, activeRoute, language, isMapReady, setActiveRoute, setCurrentStepIndex, setUserLocation, setCurrentUserLocation, setUserHeading, setAutoFollowEnabled, router, setRouteError]);
 
   // Listen to mobile device orientation/compass events to rotate the map
   useEffect(() => {
@@ -403,6 +455,24 @@ export default function NavigationPageClient({ places, nodes, edges }: Navigatio
               <span className="text-sm font-black text-on-surface">{activeRoute.duration} min</span>
             </div>
           </div>
+
+          {/* Route Recalculation Error Banner */}
+          {routeError && (
+            <div className="flex items-start gap-2.5 bg-red-500/10 dark:bg-red-500/20 p-3 rounded-xl border border-red-500/20 text-red-700 dark:text-red-300 relative">
+              <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5 animate-pulse" />
+              <div className="flex-1">
+                <span className="text-[11px] md:text-xs font-bold leading-normal">
+                  {routeError}
+                </span>
+              </div>
+              <button 
+                onClick={() => setRouteError(null)} 
+                className="text-red-700 dark:text-red-300 hover:text-red-950 dark:hover:text-red-100 flex-shrink-0 p-0.5 cursor-pointer transition-all hover:scale-105 active:scale-95"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
 
           {/* Active Navigation Instruction banner */}
           {activeRoute.instructions.length > 0 && (

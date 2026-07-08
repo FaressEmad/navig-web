@@ -104,7 +104,8 @@ function getArModifier(modifier: string): string {
 // Generate bilingual walking instructions using the public OSRM foot routing endpoint
 export async function generateRoute(
   startPlace: { latitude: number; longitude: number; nameEn?: string; nameAr?: string },
-  destinationPlace: { latitude: number; longitude: number; nameEn?: string; nameAr?: string }
+  destinationPlace: { latitude: number; longitude: number; nameEn?: string; nameAr?: string },
+  silent: boolean = false
 ): Promise<RouteData | null> {
   const startLat = startPlace.latitude;
   const startLng = startPlace.longitude;
@@ -129,27 +130,81 @@ export async function generateRoute(
       coord[0]
     ] as [number, number]);
 
-    // Verify first route coordinate is inside campus boundary
-    if (path.length > 0) {
-      const [startLatCoord, startLngCoord] = path[0];
-      if (!CampusBoundaryService.isInsideCampus(startLatCoord, startLngCoord)) {
+    // Verify first route coordinate or starting point is inside campus boundary
+    const isStartInside = CampusBoundaryService.isInsideCampus(startPlace.latitude, startPlace.longitude);
+    if (!isStartInside) {
+      if (!silent) {
         const lang = useStore.getState().language;
         alert(lang === "en"
           ? "The snapped starting point is outside Cairo University.\nPlease choose another starting point."
           : "نقطة البداية المحددة تقع خارج جامعة القاهرة بعد مطابقتها للطريق.\nيرجى اختيار نقطة بداية أخرى.");
-        return null;
+      }
+      
+      console.log(`[Route Validation Debug]`);
+      console.log(`- Start Place is genuinely outside Cairo University.`);
+      console.log(`- Final decision: Rejected`);
+      return null;
+    }
+
+    // Check if any coordinates in the path are outside the campus boundary
+    let hasOutsidePoints = false;
+    for (const [lat, lng] of path) {
+      if (!CampusBoundaryService.isInsideCampus(lat, lng)) {
+        hasOutsidePoints = true;
+        break;
       }
     }
 
-    // Verify every coordinate in the route remains inside campus boundary
-    for (const [lat, lng] of path) {
-      if (!CampusBoundaryService.isInsideCampus(lat, lng)) {
-        const lang = useStore.getState().language;
-        alert(lang === "en"
-          ? "Unable to calculate a campus-only walking route."
-          : "تعذر حساب مسار مشي داخل الحرم الجامعي فقط.");
+    if (hasOutsidePoints) {
+      // Calculate total route length and distance spent outside the boundary
+      let totalLength = 0;
+      let outsideLength = 0;
+
+      for (let i = 0; i < path.length - 1; i++) {
+        const [lat1, lng1] = path[i];
+        const [lat2, lng2] = path[i+1];
+        const segDist = getHaversineDistance(lat1, lng1, lat2, lng2);
+        totalLength += segDist;
+
+        // If either endpoint of the segment is outside the campus, count it as outside length
+        const p1Inside = CampusBoundaryService.isInsideCampus(lat1, lng1);
+        const p2Inside = CampusBoundaryService.isInsideCampus(lat2, lng2);
+        if (!p1Inside || !p2Inside) {
+          outsideLength += segDist;
+        }
+      }
+
+      const percentOutside = totalLength > 0 ? (outsideLength / totalLength) * 100 : 0;
+
+      console.log(`[Route Validation Debug]`);
+      console.log(`- Total route length: ${totalLength.toFixed(2)} meters`);
+      console.log(`- Length outside boundary: ${outsideLength.toFixed(2)} meters`);
+      console.log(`- Percentage outside: ${percentOutside.toFixed(2)}%`);
+
+      // If only a very small portion (<= 10%) lies outside due to inaccuracies, accept it
+      if (percentOutside <= 10) {
+        console.log(`- Final decision: Accepted (Small geometry inaccuracy: ${percentOutside.toFixed(2)}% <= 10%)`);
+      } else {
+        console.log(`- Final decision: Rejected (Significant portion outside: ${percentOutside.toFixed(2)}% > 10%)`);
+        if (!silent) {
+          const lang = useStore.getState().language;
+          alert(lang === "en"
+            ? "Unable to calculate a campus-only walking route."
+            : "تعذر حساب مسار مشي داخل الحرم الجامعي فقط.");
+        }
         return null;
       }
+    } else {
+      // Keep normal validation debug logging for routes fully inside
+      let totalLength = 0;
+      for (let i = 0; i < path.length - 1; i++) {
+        totalLength += getHaversineDistance(path[i][0], path[i][1], path[i+1][0], path[i+1][1]);
+      }
+      console.log(`[Route Validation Debug]`);
+      console.log(`- Total route length: ${totalLength.toFixed(2)} meters`);
+      console.log(`- Length outside boundary: 0.00 meters`);
+      console.log(`- Percentage outside: 0.00%`);
+      console.log(`- Final decision: Accepted`);
     }
 
     const distance = Math.round(route.distance);
