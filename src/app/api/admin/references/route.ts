@@ -26,7 +26,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { nameEn, nameAr, displayNameAr, aliases, descriptionEn, descriptionAr, type, latitude, longitude, floor, roomNumber, buildingId } = body;
+    const { nameEn, nameAr, displayNameAr, aliases, descriptionEn, descriptionAr, type, latitude, longitude, floor, roomNumber, buildingId, indoorX, indoorY } = body;
 
     if (!nameEn || !nameAr || !type || !buildingId || latitude === undefined || longitude === undefined) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -36,6 +36,12 @@ export async function POST(request: Request) {
 
     const parsedFloor = (floor !== undefined && floor !== null && floor !== "") ? parseInt(floor) : null;
     const safeFloor = (parsedFloor !== null && isNaN(parsedFloor)) ? null : parsedFloor;
+
+    const parsedIndoorX = (indoorX !== undefined && indoorX !== null && indoorX !== "") ? parseFloat(indoorX) : null;
+    const safeIndoorX = (parsedIndoorX !== null && isNaN(parsedIndoorX)) ? null : parsedIndoorX;
+
+    const parsedIndoorY = (indoorY !== undefined && indoorY !== null && indoorY !== "") ? parseFloat(indoorY) : null;
+    const safeIndoorY = (parsedIndoorY !== null && isNaN(parsedIndoorY)) ? null : parsedIndoorY;
 
     const reference = await prisma.place.create({
       data: {
@@ -51,11 +57,14 @@ export async function POST(request: Request) {
         longitude,
         floor: safeFloor,
         roomNumber,
-        buildingId
+        buildingId,
+        indoorX: safeIndoorX,
+        indoorY: safeIndoorY
       }
     });
 
     revalidatePath("/");
+    revalidatePath("/admin");
     revalidatePath("/search");
     revalidatePath("/navigation");
     revalidatePath("/directory");
@@ -70,7 +79,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { id, nameEn, nameAr, displayNameAr, aliases, descriptionEn, descriptionAr, type, latitude, longitude, floor, roomNumber, buildingId } = body;
+    const { id, nameEn, nameAr, displayNameAr, aliases, descriptionEn, descriptionAr, type, latitude, longitude, floor, roomNumber, buildingId, indoorX, indoorY } = body;
 
     console.log(`[API References PUT] Received ID to update: "${id}"`);
 
@@ -91,6 +100,12 @@ export async function PUT(request: Request) {
     const parsedFloor = (floor !== undefined && floor !== null && floor !== "") ? parseInt(floor) : null;
     const safeFloor = (parsedFloor !== null && isNaN(parsedFloor)) ? null : parsedFloor;
 
+    const parsedIndoorX = (indoorX !== undefined && indoorX !== null && indoorX !== "") ? parseFloat(indoorX) : null;
+    const safeIndoorX = (parsedIndoorX !== null && isNaN(parsedIndoorX)) ? null : parsedIndoorX;
+
+    const parsedIndoorY = (indoorY !== undefined && indoorY !== null && indoorY !== "") ? parseFloat(indoorY) : null;
+    const safeIndoorY = (parsedIndoorY !== null && isNaN(parsedIndoorY)) ? null : parsedIndoorY;
+
     const updated = await prisma.place.update({
       where: { id },
       data: {
@@ -105,11 +120,14 @@ export async function PUT(request: Request) {
         longitude,
         floor: safeFloor,
         roomNumber,
-        buildingId
+        buildingId,
+        indoorX: safeIndoorX,
+        indoorY: safeIndoorY
       }
     });
 
     revalidatePath("/");
+    revalidatePath("/admin");
     revalidatePath("/search");
     revalidatePath("/navigation");
     revalidatePath("/directory");
@@ -146,6 +164,7 @@ export async function DELETE(request: Request) {
     });
 
     revalidatePath("/");
+    revalidatePath("/admin");
     revalidatePath("/search");
     revalidatePath("/navigation");
     revalidatePath("/directory");

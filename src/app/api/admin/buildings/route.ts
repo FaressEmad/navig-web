@@ -53,6 +53,7 @@ export async function POST(request: Request) {
     });
 
     revalidatePath("/");
+    revalidatePath("/admin");
     revalidatePath("/search");
     revalidatePath("/navigation");
     revalidatePath("/directory");
@@ -110,6 +111,7 @@ export async function PUT(request: Request) {
     });
 
     revalidatePath("/");
+    revalidatePath("/admin");
     revalidatePath("/search");
     revalidatePath("/navigation");
     revalidatePath("/directory");
@@ -151,6 +153,7 @@ export async function DELETE(request: Request) {
     });
 
     revalidatePath("/");
+    revalidatePath("/admin");
     revalidatePath("/search");
     revalidatePath("/navigation");
     revalidatePath("/directory");

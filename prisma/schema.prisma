@@ -36,8 +36,23 @@ model Place {
   faculty       Faculty? @relation(fields: [facultyId], references: [id])
   building      Place?   @relation("BuildingRooms", fields: [buildingId], references: [id], onDelete: Cascade)
   indoorPlaces  Place[]  @relation("BuildingRooms")
+  indoorMaps    IndoorMap[] @relation("BuildingIndoorMaps")
+  indoorX       Float?   // Percentage X coordinate on the indoor floor map (0-100)
+  indoorY       Float?   // Percentage Y coordinate on the indoor floor map (0-100)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model IndoorMap {
+  id            String   @id @default(uuid())
+  buildingId    String
+  floor         Int      // Floor number (0 = Ground, 1 = First, etc.)
+  imageUrl      String   // Image url/path to floor plan
+  building      Place    @relation("BuildingIndoorMaps", fields: [buildingId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([buildingId, floor])
 }
 
 model NavigationNode {

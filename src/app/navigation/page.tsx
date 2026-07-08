@@ -28,6 +28,8 @@ export default async function NavigationPage() {
     roomNumber: p.roomNumber,
     facultyId: p.facultyId,
     buildingId: p.buildingId,
+    indoorX: p.indoorX,
+    indoorY: p.indoorY,
     faculty: p.faculty ? {
       id: p.faculty.id,
       nameEn: p.faculty.nameEn,

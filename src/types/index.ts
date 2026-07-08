@@ -35,6 +35,8 @@ export interface Place {
   faculty?: Faculty | null;
   parentBuilding?: Place | null;
   indoorPlaces?: Place[];
+  indoorX?: number | null;
+  indoorY?: number | null;
 }
 
 export interface NavigationNode {

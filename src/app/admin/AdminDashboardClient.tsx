@@ -25,7 +25,8 @@ import {
   CheckCircle,
   AlertTriangle,
   HelpCircle,
-  ChevronDown
+  ChevronDown,
+  Map
 } from "lucide-react";
 
 interface AdminDashboardClientProps {
@@ -44,7 +45,7 @@ export default function AdminDashboardClient({
   const router = useRouter();
   const { t, language } = useTranslation();
   const [authorized, setAuthorized] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "buildings" | "references" | "categories" | "settings">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "buildings" | "references" | "categories" | "indoor_maps" | "settings">("overview");
 
   // Dynamic state for places list managed during session
   const [places, setPlaces] = useState<Place[]>(initialPlaces);
@@ -75,7 +76,21 @@ export default function AdminDashboardClient({
   // CRUD Forms State: References (indoor rooms/halls)
   const [isEditingRef, setIsEditingRef] = useState(false);
   const [selectedRefId, setSelectedRefId] = useState<string | null>(null);
-  const [refForm, setRefForm] = useState({
+  const [refForm, setRefForm] = useState<{
+    id: string;
+    nameEn: string;
+    nameAr: string;
+    displayNameAr: string;
+    aliases: string;
+    descriptionEn: string;
+    descriptionAr: string;
+    type: string;
+    floor: number;
+    roomNumber: string;
+    buildingId: string;
+    indoorX: number | null;
+    indoorY: number | null;
+  }>({
     id: "",
     nameEn: "",
     nameAr: "",
@@ -86,14 +101,41 @@ export default function AdminDashboardClient({
     type: "LECTURE_HALL",
     floor: 0,
     roomNumber: "",
-    buildingId: ""
+    buildingId: "",
+    indoorX: null,
+    indoorY: null
   });
+
+  // Indoor Maps State
+  const [indoorMaps, setIndoorMaps] = useState<any[]>([]);
+  const [selectedMapBuildingId, setSelectedMapBuildingId] = useState<string>("");
+  const [isAddingFloorMap, setIsAddingFloorMap] = useState(false);
+  const [floorMapForm, setFloorMapForm] = useState({
+    floor: 0,
+    imageUrl: "/images/floors/floor_ground.png"
+  });
+  
+  // Selected reference for visual pinning coordinates tool
+  const [selectedMappingRefId, setSelectedMappingRefId] = useState<string>("");
+  const [tempMappingPin, setTempMappingPin] = useState<{ x: number, y: number } | null>(null);
 
   // CSV Import state
   const [importStatus, setImportStatus] = useState<{ type: "success" | "error" | null, message: string }>({ type: null, message: "" });
   const [importType, setImportType] = useState<"buildings" | "references">("buildings");
   const [csvText, setCsvText] = useState("");
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+
+  const refreshIndoorMaps = async () => {
+    try {
+      const res = await fetch(`/api/admin/indoor-maps?t=${Date.now()}`, { cache: "no-store" });
+      if (res.ok) {
+        const data = await res.json();
+        setIndoorMaps(data);
+      }
+    } catch (err) {
+      console.error("Failed to load indoor maps:", err);
+    }
+  };
 
   // Verify session authorization
   useEffect(() => {
@@ -107,6 +149,25 @@ export default function AdminDashboardClient({
     }
   }, [router]);
 
+  // Fetch updated list of indoor maps when authorized
+  useEffect(() => {
+    if (authorized) {
+      refreshIndoorMaps();
+      // Set default selected building for maps tab (first FACULTY_BUILDING)
+      const firstBuilding = initialPlaces.find(p => p.type === "FACULTY_BUILDING");
+      if (firstBuilding) {
+        setSelectedMapBuildingId(firstBuilding.id);
+      }
+    }
+  }, [authorized]);
+
+  // Re-fetch indoor maps whenever the selected building changes
+  useEffect(() => {
+    if (authorized && selectedMapBuildingId) {
+      refreshIndoorMaps();
+    }
+  }, [selectedMapBuildingId]);
+
   // Fetch updated list of places from PostgreSQL endpoints
   const refreshPlaces = async () => {
     try {
@@ -115,6 +176,7 @@ export default function AdminDashboardClient({
       const res2 = await fetch(`/api/admin/references?t=${Date.now()}`, { cache: "no-store" });
       const references: Place[] = await res2.json();
       setPlaces([...buildings, ...references]);
+      await refreshIndoorMaps();
       router.refresh();
     } catch (err) {
       console.error("Refresh failed: ", err);
@@ -251,7 +313,9 @@ export default function AdminDashboardClient({
           type: "LECTURE_HALL",
           floor: 0,
           roomNumber: "",
-          buildingId: ""
+          buildingId: "",
+          indoorX: null,
+          indoorY: null
         });
         refreshPlaces();
       } else {
@@ -277,7 +341,9 @@ export default function AdminDashboardClient({
       type: r.type,
       floor: r.floor || 0,
       roomNumber: r.roomNumber || "",
-      buildingId: r.buildingId || ""
+      buildingId: r.buildingId || "",
+      indoorX: r.indoorX !== undefined ? r.indoorX : null,
+      indoorY: r.indoorY !== undefined ? r.indoorY : null
     });
   };
 
@@ -429,6 +495,16 @@ export default function AdminDashboardClient({
           >
             <FolderOpen className="w-4 h-4" />
             <span>Categories Map</span>
+          </button>
+
+          <button
+            onClick={() => { setActiveTab("indoor_maps"); setIsEditingBuilding(false); setIsEditingRef(false); }}
+            className={`p-3 rounded-xl text-xs font-bold transition-all flex items-center gap-3 active:scale-95 whitespace-nowrap flex-shrink-0 md:w-full ${
+              activeTab === "indoor_maps" ? "bg-primary text-white shadow-md" : "text-secondary hover:bg-surface-variant/20 hover:text-primary"
+            }`}
+          >
+            <Map className="w-4 h-4" />
+            <span>Indoor Floor Maps</span>
           </button>
 
           <button
@@ -844,7 +920,9 @@ export default function AdminDashboardClient({
                       type: "LECTURE_HALL",
                       floor: 0,
                       roomNumber: "",
-                      buildingId: buildingsList[0]?.id || ""
+                      buildingId: "",
+                      indoorX: null,
+                      indoorY: null
                     });
                   }}
                   className="bg-primary hover:bg-primary-container text-white px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
@@ -899,6 +977,7 @@ export default function AdminDashboardClient({
                       onChange={(e) => setRefForm({ ...refForm, buildingId: e.target.value })}
                       className="bg-surface-container border border-outline-variant/10 rounded-xl p-2.5 text-xs text-on-surface outline-none"
                     >
+                      <option value="" disabled>Select parent building...</option>
                       {places.filter(p => p.buildingId === null).map(b => (
                         <option key={b.id} value={b.id}>{b.nameEn} ({b.nameAr})</option>
                       ))}
@@ -1218,6 +1297,468 @@ export default function AdminDashboardClient({
                 </span>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* TAB 6: INDOOR FLOOR MAPS */}
+        {activeTab === "indoor_maps" && (
+          <div className="flex flex-col gap-6 animate-fadeIn">
+            <div className="border-b border-outline-variant/10 pb-4">
+              <h1 className="text-2xl font-black text-on-surface">Manage Indoor Floor Maps</h1>
+              <p className="text-xs text-secondary mt-1">Upload and configure blueprint maps for building floors to activate indoor wayfinding.</p>
+            </div>
+
+            {/* Selector & Upload Grid */}
+            <div className="grid md:grid-cols-3 gap-6">
+              
+              {/* Select Building and Add Floor Map */}
+              <div className="md:col-span-1 flex flex-col gap-5">
+                <div className="glass-card p-5 border border-outline-variant/10 rounded-2xl flex flex-col gap-4">
+                  <h3 className="font-bold text-xs text-on-surface uppercase tracking-wider">Select Building</h3>
+                  <div className="flex flex-col gap-1.5">
+                    <select
+                      value={selectedMapBuildingId}
+                      onChange={(e) => {
+                        setSelectedMapBuildingId(e.target.value);
+                        setSelectedMappingRefId("");
+                        setTempMappingPin(null);
+                        setIsAddingFloorMap(false);
+                        // Reset image upload form so no stale URL persists from previous building
+                        setFloorMapForm({ floor: 0, imageUrl: "" });
+                      }}
+                      className="bg-surface-container border border-outline-variant/10 rounded-xl p-2.5 text-xs text-on-surface outline-none"
+                    >
+                      <option value="" disabled>Select building...</option>
+                      {places.filter(p =>
+                        p.buildingId === null && (
+                          p.type === "FACULTY_BUILDING" ||
+                          indoorMaps.some(m => m.buildingId === p.id)
+                        )
+                      ).map(b => {
+                        const hasMaps = indoorMaps.some(m => m.buildingId === b.id);
+                        const hasRefs = places.some(p => p.buildingId === b.id);
+                        return (
+                          <option key={b.id} value={b.id}>
+                            {hasMaps ? "✓ " : ""}{b.nameEn} ({b.nameAr}){hasRefs ? " · has refs" : ""}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+                </div>
+
+                {selectedMapBuildingId && (
+                  <div className="glass-card p-5 border border-outline-variant/10 rounded-2xl flex flex-col gap-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-bold text-xs text-on-surface uppercase tracking-wider">Add Floor Map</h3>
+                      <button 
+                        onClick={() => setIsAddingFloorMap(!isAddingFloorMap)}
+                        className="text-xs font-bold text-primary hover:underline"
+                      >
+                        {isAddingFloorMap ? "Cancel" : "Add Floor"}
+                      </button>
+                    </div>
+
+                    {isAddingFloorMap && (
+                      <form onSubmit={async (e) => {
+                        e.preventDefault();
+                        if (!floorMapForm.imageUrl) {
+                          alert("Please upload a blueprint image before saving.");
+                          return;
+                        }
+                        try {
+                          const res = await fetch("/api/admin/indoor-maps", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              buildingId: selectedMapBuildingId,
+                              floor: floorMapForm.floor,
+                              imageUrl: floorMapForm.imageUrl
+                            })
+                          });
+
+                          if (res.ok) {
+                            alert("Floor map added successfully!");
+                            setIsAddingFloorMap(false);
+                            refreshIndoorMaps();
+                          } else {
+                            const errData = await res.json();
+                            alert(`Error: ${errData.error}`);
+                          }
+                        } catch (err: any) {
+                          alert(`Upload failed: ${err.message}`);
+                        }
+                      }} className="flex flex-col gap-4 mt-2">
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[9px] font-bold text-secondary uppercase">Floor Level</label>
+                          <select
+                            value={floorMapForm.floor}
+                            onChange={(e) => setFloorMapForm({ ...floorMapForm, floor: parseInt(e.target.value) })}
+                            className="bg-surface-container border border-outline-variant/10 rounded-xl p-2 text-xs text-on-surface outline-none"
+                          >
+                            <option value={0}>Ground Floor (0)</option>
+                            <option value={1}>1st Floor (1)</option>
+                            <option value={2}>2nd Floor (2)</option>
+                            <option value={3}>3rd Floor (3)</option>
+                            <option value={4}>4th Floor (4)</option>
+                          </select>
+                        </div>
+
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[9px] font-bold text-secondary uppercase">Blueprint Image</label>
+                          <label
+                            className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl p-5 cursor-pointer transition-all select-none ${
+                              floorMapForm.imageUrl
+                                ? "border-primary/40 bg-primary/5"
+                                : "border-outline-variant/20 hover:border-primary/30 hover:bg-surface-container/30"
+                            }`}
+                          >
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                const fd = new FormData();
+                                fd.append("file", file);
+                                try {
+                                  const res = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+                                  const data = await res.json();
+                                  if (data.url) {
+                                    setFloorMapForm({ ...floorMapForm, imageUrl: data.url });
+                                  } else {
+                                    alert(data.error || "Upload failed");
+                                  }
+                                } catch {
+                                  alert("Upload failed. Please try again.");
+                                }
+                              }}
+                            />
+                            {floorMapForm.imageUrl ? (
+                              <>
+                                <img
+                                  src={floorMapForm.imageUrl}
+                                  alt="Uploaded blueprint preview"
+                                  className="max-h-28 rounded-lg object-contain border border-outline-variant/10"
+                                />
+                                <span className="text-[10px] text-primary font-bold">Click to change image</span>
+                              </>
+                            ) : (
+                              <>
+                                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                                  <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-[11px] font-bold text-on-surface">Click to upload blueprint</p>
+                                  <p className="text-[10px] text-secondary mt-0.5">PNG, JPG, WebP up to 10MB</p>
+                                </div>
+                              </>
+                            )}
+                          </label>
+                        </div>
+
+                        <button
+                          type="submit"
+                          className="bg-primary hover:bg-primary-container text-white py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer"
+                        >
+                          Save Floor Map
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Display Floors Grid */}
+              <div className="md:col-span-2 flex flex-col gap-5">
+                <div className="glass-card p-5 border border-outline-variant/10 rounded-2xl flex flex-col gap-4">
+                  <h3 className="font-bold text-xs text-on-surface uppercase tracking-wider">Configured Floor Maps</h3>
+                  
+                  {!selectedMapBuildingId ? (
+                    <p className="text-xs text-secondary italic py-6 text-center">Please select a building on the left to see its floor maps.</p>
+                  ) : (
+                    (() => {
+                      const buildingMaps = indoorMaps.filter(m => m.buildingId === selectedMapBuildingId);
+                      if (buildingMaps.length === 0) {
+                        return (
+                          <div className="py-8 text-center text-xs text-secondary flex flex-col items-center gap-2">
+                            <AlertTriangle className="w-5 h-5 text-amber-500" />
+                            <span>No floor maps configured for this building yet.</span>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div className="grid sm:grid-cols-2 gap-4">
+                          {buildingMaps.map((map) => {
+                            const floorNames = ["Ground Floor", "1st Floor", "2nd Floor", "3rd Floor", "4th Floor"];
+                            const floorName = floorNames[map.floor] || `${map.floor}th Floor`;
+
+                            return (
+                              <div key={map.id} className="bg-surface-container/30 border border-outline-variant/10 rounded-2xl overflow-hidden p-3.5 flex flex-col gap-3">
+                                <div className="flex justify-between items-center">
+                                  <div>
+                                    <h4 className="font-bold text-xs text-on-surface">{floorName}</h4>
+                                    <span className="text-[9px] text-secondary font-mono truncate max-w-[120px] block">{map.imageUrl}</span>
+                                  </div>
+                                  <button
+                                    onClick={async () => {
+                                      if (!confirm(`Are you sure you want to delete the map for ${floorName}?`)) return;
+                                      try {
+                                        const res = await fetch(`/api/admin/indoor-maps?id=${map.id}`, { method: "DELETE" });
+                                        if (res.ok) {
+                                          alert("Floor plan deleted!");
+                                          refreshIndoorMaps();
+                                        } else {
+                                          const err = await res.json();
+                                          alert(`Delete failed: ${err.error}`);
+                                        }
+                                      } catch (err: any) {
+                                        alert(`Error: ${err.message}`);
+                                      }
+                                    }}
+                                    className="p-1 hover:bg-red-500/10 text-red-500 rounded-lg transition-all"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                                <div className="relative h-28 bg-black/10 rounded-xl overflow-hidden flex items-center justify-center border border-outline-variant/5">
+                                  <img
+                                    src={map.imageUrl}
+                                    alt={floorName}
+                                    className="max-h-full max-w-full object-contain"
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()
+                  )}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Visual Coordinates Room Pinning Tool */}
+            {selectedMapBuildingId && indoorMaps.filter(m => m.buildingId === selectedMapBuildingId).length > 0 && (
+              <div className="glass-card p-6 border border-outline-variant/10 rounded-2xl flex flex-col gap-5 text-left">
+                <div className="border-b border-outline-variant/5 pb-3">
+                  <h3 className="font-bold text-sm text-on-surface">Visual Room Pinning Tool</h3>
+                  <p className="text-[10px] text-secondary mt-1">Select a floor plan, pick a classroom/hall, and click on the map to set its coordinates.</p>
+                </div>
+
+                <div className="grid md:grid-cols-4 gap-6 items-start">
+                  
+                  {/* Select Floor & Reference */}
+                  <div className="md:col-span-1 flex flex-col gap-4">
+                    {(() => {
+                      const buildingMaps = indoorMaps.filter(m => m.buildingId === selectedMapBuildingId);
+                      // Extract active map
+                      let activeMap = buildingMaps.find(m => m.id === selectedMappingRefId);
+                      if (!activeMap) {
+                        if (selectedMappingRefId.startsWith("ref-")) {
+                          const refId = selectedMappingRefId.replace("ref-", "");
+                          const refObj = places.find(p => p.id === refId);
+                          if (refObj) {
+                            activeMap = buildingMaps.find(m => m.floor === refObj.floor);
+                          }
+                        }
+                      }
+                      if (!activeMap) {
+                        activeMap = buildingMaps[0];
+                      }
+
+                      const activeMapFloor = activeMap ? activeMap.floor : 0;
+
+                      // Show ALL references for the selected building (not filtered by floor)
+                      // When the admin picks a reference, the floor plan auto-switches to match
+                      const floorRefs = places.filter(p => p.buildingId === selectedMapBuildingId && p.buildingId !== null);
+
+                      return (
+                        <>
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[9px] font-bold text-secondary uppercase">Select Floor Plan</label>
+                            <select
+                              value={activeMap?.id || ""}
+                              onChange={(e) => {
+                                setSelectedMappingRefId(e.target.value);
+                                setTempMappingPin(null);
+                              }}
+                              className="bg-surface-container border border-outline-variant/10 rounded-xl p-2.5 text-xs text-on-surface outline-none"
+                            >
+                              {buildingMaps.map((map) => {
+                                const floorNames = ["Ground Floor", "1st Floor", "2nd Floor", "3rd Floor", "4th Floor"];
+                                return (
+                                  <option key={map.id} value={map.id}>
+                                    {floorNames[map.floor] || `${map.floor}th Floor`}
+                                  </option>
+                                );
+                              })}
+                            </select>
+                          </div>
+
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[9px] font-bold text-secondary uppercase">Select Reference / Room</label>
+                            <select
+                              value={selectedMappingRefId.startsWith("ref-") ? selectedMappingRefId.replace("ref-", "") : ""}
+                              onChange={(e) => {
+                                const refId = e.target.value;
+                                if (refId) {
+                                  setSelectedMappingRefId(`ref-${refId}`);
+                                  // Pre-load coordinates if already set
+                                  const refObj = places.find(p => p.id === refId);
+                                  if (refObj && refObj.indoorX !== null && refObj.indoorX !== undefined && refObj.indoorY !== null && refObj.indoorY !== undefined) {
+                                    setTempMappingPin({ x: refObj.indoorX, y: refObj.indoorY });
+                                  } else {
+                                    setTempMappingPin(null);
+                                  }
+                                } else {
+                                  setSelectedMappingRefId("");
+                                  setTempMappingPin(null);
+                                }
+                              }}
+                              className="bg-surface-container border border-outline-variant/10 rounded-xl p-2.5 text-xs text-on-surface outline-none"
+                            >
+                              <option value="">Select room...</option>
+                              {floorRefs.map((ref) => (
+                                <option key={ref.id} value={ref.id}>
+                                  {ref.nameEn} ({ref.roomNumber ? `Room ${ref.roomNumber}` : `Floor ${ref.floor}`})
+                                </option>
+                              ))}
+                            </select>
+                            <p className="text-[9px] text-secondary mt-0.5">
+                              {floorRefs.length} reference(s) linked to this building
+                            </p>
+                          </div>
+
+                          {selectedMappingRefId.startsWith("ref-") && tempMappingPin && (
+                            <button
+                              onClick={async () => {
+                                const refId = selectedMappingRefId.replace("ref-", "");
+                                const refObj = places.find(p => p.id === refId);
+                                if (!refObj) return;
+
+                                try {
+                                  const payload = {
+                                    ...refObj,
+                                    floor: activeMapFloor,
+                                    indoorX: tempMappingPin.x,
+                                    indoorY: tempMappingPin.y
+                                  };
+
+                                  const res = await fetch("/api/admin/references", {
+                                    method: "PUT",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify(payload)
+                                  });
+
+                                  if (res.ok) {
+                                    alert("Room position saved successfully!");
+                                    refreshPlaces();
+                                  } else {
+                                    const errData = await res.json();
+                                    alert(`Error: ${errData.error}`);
+                                  }
+                                } catch (err: any) {
+                                  alert(`Save failed: ${err.message}`);
+                                }
+                              }}
+                              className="w-full bg-primary hover:bg-primary-container text-white py-2.5 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer mt-2"
+                            >
+                              Save Room Coordinates
+                            </button>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Blueprint View and click surface */}
+                  <div className="md:col-span-3">
+                    {(() => {
+                      const buildingMaps = indoorMaps.filter(m => m.buildingId === selectedMapBuildingId);
+                      // Determine the active map based on selection or fallback to first map
+                      let activeMap = buildingMaps.find(m => m.id === selectedMappingRefId);
+                      if (!activeMap) {
+                        // If selectedMappingRefId starts with ref- check the floor level
+                        if (selectedMappingRefId.startsWith("ref-")) {
+                          const refId = selectedMappingRefId.replace("ref-", "");
+                          const refObj = places.find(p => p.id === refId);
+                          if (refObj) {
+                            activeMap = buildingMaps.find(m => m.floor === refObj.floor);
+                          }
+                        }
+                      }
+                      if (!activeMap) {
+                        activeMap = buildingMaps[0];
+                      }
+
+                      if (!activeMap) return null;
+
+                      // Get all references plotted on this floor map
+                      const plottedRefs = places.filter(p => p.buildingId === selectedMapBuildingId && p.floor === activeMap.floor && p.indoorX !== null && p.indoorY !== null);
+
+                      return (
+                        <div className="flex flex-col gap-2">
+                          <span className="text-[10px] text-secondary font-bold uppercase block pl-1">
+                            Click on the map to pin room location
+                          </span>
+                          <div 
+                            onClick={(e) => {
+                              if (!selectedMappingRefId.startsWith("ref-")) {
+                                alert("Please select a Reference room first to pin it.");
+                                return;
+                              }
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              const x = ((e.clientX - rect.left) / rect.width) * 100;
+                              const y = ((e.clientY - rect.top) / rect.height) * 100;
+                              setTempMappingPin({ x, y });
+                            }}
+                            className="relative bg-slate-900 border border-outline-variant/15 rounded-2xl overflow-hidden flex items-center justify-center p-4 cursor-crosshair select-none max-h-[500px]"
+                          >
+                            <img
+                              src={activeMap.imageUrl}
+                              alt="Indoor floor plan"
+                              className="max-w-full max-h-[400px] object-contain pointer-events-none"
+                            />
+
+                            {/* Render already saved room pins */}
+                            {plottedRefs.map((ref) => (
+                              <div
+                                key={ref.id}
+                                style={{ left: `${ref.indoorX}%`, top: `${ref.indoorY}%` }}
+                                className="absolute w-3.5 h-3.5 -ml-1.75 -mt-1.75 bg-blue-500 rounded-full border-2 border-white shadow-md flex items-center justify-center pointer-events-none group/pin"
+                                title={ref.nameEn}
+                              >
+                                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover/pin:block bg-slate-950 text-white text-[9px] px-1.5 py-0.5 rounded shadow-lg whitespace-nowrap z-30 font-bold">
+                                  {ref.nameEn}
+                                </span>
+                              </div>
+                            ))}
+
+                            {/* Render temp selection pin */}
+                            {selectedMappingRefId.startsWith("ref-") && tempMappingPin && (
+                              <div
+                                style={{ left: `${tempMappingPin.x}%`, top: `${tempMappingPin.y}%` }}
+                                className="absolute w-4 h-4 -ml-2 -mt-2 bg-red-500 rounded-full border-2 border-white shadow-xl flex items-center justify-center pointer-events-none animate-pulse z-20"
+                              >
+                                <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                </div>
+              </div>
+            )}
           </div>
         )}
 
