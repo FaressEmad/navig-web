@@ -105,7 +105,7 @@ function MapController() {
       let targetZoom = mapZoom;
       if (isNavigating) {
         target = getOffsetCenter(mapCenter);
-        targetZoom = 19;
+        targetZoom = 20;
       }
 
       try {
@@ -125,7 +125,7 @@ function MapController() {
     if (isNavigating && isAutoFollowEnabled && userLocation) {
       const target = getOffsetCenter(userLocation);
       try {
-        map.setView(target, 19, {
+        map.setView(target, 20, {
           animate: true,
           duration: 0.5,
         });

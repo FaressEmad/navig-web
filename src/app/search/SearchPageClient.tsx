@@ -175,7 +175,7 @@ export default function SearchPageClient({ places, nodes, edges }: SearchPageCli
       },
       (error) => {
         setIsDetectingGPS(false);
-        console.error("GPS detection failed:", error);
+        console.warn("GPS detection failed:", error);
         alert(language === "en" 
           ? "Failed to detect your GPS location. Please choose a starting point manually." 
           : "فشل تحديد موقعك الجغرافي. يرجى اختيار نقطة البداية يدوياً.");

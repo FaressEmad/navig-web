@@ -235,7 +235,7 @@ export default function NavigationPageClient({ places, nodes, edges }: Navigatio
     };
 
     const handleError = (err: GeolocationPositionError) => {
-      console.error("GPS Watch Error: ", err);
+      console.warn("GPS Watch Error: ", err);
     };
 
     const watchId = navigator.geolocation.watchPosition(handleSuccess, handleError, {
@@ -254,10 +254,68 @@ export default function NavigationPageClient({ places, nodes, edges }: Navigatio
     };
   }, [destinationPlace, isNavigating, nodes, edges, activeRoute, language, isMapReady, setActiveRoute, setCurrentStepIndex, setUserLocation, setCurrentUserLocation, setUserHeading, setAutoFollowEnabled, router]);
 
+  // Listen to mobile device orientation/compass events to rotate the map
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.addEventListener) return;
+    if (!isNavigating) return;
+
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      let heading = 0;
+      
+      // On iOS devices, e.webkitCompassHeading exists
+      if ((e as any).webkitCompassHeading !== undefined) {
+        heading = (e as any).webkitCompassHeading;
+      } else if (e.alpha !== null && e.alpha !== undefined) {
+        // e.alpha is 0 to 360, relative to where the phone was pointing when initialized
+        // if absolute is supported (Android Chrome), it is relative to magnetic north.
+        heading = 360 - e.alpha;
+      } else {
+        return;
+      }
+
+      // Round to 1 decimal place to prevent sub-pixel layout thrashing
+      const roundedHeading = Math.round(heading * 10) / 10;
+      setUserHeading(roundedHeading);
+    };
+
+    // Request iOS orientation permission if required
+    const requestiOSPermission = async () => {
+      const DeviceOrientationEventAny = DeviceOrientationEvent as any;
+      if (
+        DeviceOrientationEventAny &&
+        typeof DeviceOrientationEventAny.requestPermission === "function"
+      ) {
+        try {
+          const permissionState = await DeviceOrientationEventAny.requestPermission();
+          if (permissionState === "granted") {
+            window.addEventListener("deviceorientation", handleOrientation, true);
+          }
+        } catch (err) {
+          console.warn("DeviceOrientation permission request failed:", err);
+        }
+      } else {
+        // Non-iOS or absolute orientation supported natively
+        const windowAny = window as any;
+        if ("ondeviceorientationabsolute" in windowAny) {
+          windowAny.addEventListener("deviceorientationabsolute", handleOrientation, true);
+        } else {
+          windowAny.addEventListener("deviceorientation", handleOrientation, true);
+        }
+      }
+    };
+
+    requestiOSPermission();
+
+    return () => {
+      window.removeEventListener("deviceorientation", handleOrientation, true);
+      window.removeEventListener("deviceorientationabsolute", handleOrientation, true);
+    };
+  }, [isNavigating, setUserHeading]);
+
   const handleRecenter = () => {
     const targetLoc = userLocation || currentUserLocation;
     if (targetLoc) {
-      flyTo(targetLoc, 19);
+      flyTo(targetLoc, 20); // Zoom in to level 20 close-up
       setAutoFollowEnabled(true);
     }
   };
