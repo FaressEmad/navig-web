@@ -66,9 +66,9 @@ export default function Layout({ children }: LayoutProps) {
       <header className="sticky top-0 z-40 w-full glass-card border-b border-outline-variant/10 shadow-sm flex items-center justify-between px-margin-mobile md:px-margin-desktop py-4">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-3 select-none hover:opacity-90 transition-opacity">
-          <div className="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center shadow-sm flex-shrink-0 border border-outline-variant/10">
+          <div className="w-12 h-12 rounded-lg bg-white p-1 flex items-center justify-center shadow-sm flex-shrink-0 border border-outline-variant/10">
             <img 
-              src="/images/cairo_university_logo.jpg" 
+              src="/images/cairo_university_logo.png" 
               alt="Cairo University Logo" 
               className="w-full h-full object-contain"
             />
