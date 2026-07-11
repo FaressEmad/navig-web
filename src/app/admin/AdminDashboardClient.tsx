@@ -1709,47 +1709,51 @@ export default function AdminDashboardClient({
                             Click on the map to pin room location
                           </span>
                           <div 
-                            onClick={(e) => {
-                              if (!selectedMappingRefId.startsWith("ref-")) {
-                                alert("Please select a Reference room first to pin it.");
-                                return;
-                              }
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              const x = ((e.clientX - rect.left) / rect.width) * 100;
-                              const y = ((e.clientY - rect.top) / rect.height) * 100;
-                              setTempMappingPin({ x, y });
-                            }}
-                            className="relative bg-slate-900 border border-outline-variant/15 rounded-2xl overflow-hidden flex items-center justify-center p-4 cursor-crosshair select-none max-h-[500px]"
+                            className="relative bg-slate-900 border border-outline-variant/15 rounded-2xl overflow-hidden flex items-center justify-center p-4 cursor-crosshair select-none max-h-[500px] w-full"
                           >
-                            <img
-                              src={activeMap.imageUrl}
-                              alt="Indoor floor plan"
-                              className="max-w-full max-h-[400px] object-contain pointer-events-none"
-                            />
+                            <div
+                              onClick={(e) => {
+                                if (!selectedMappingRefId.startsWith("ref-")) {
+                                  alert("Please select a Reference room first to pin it.");
+                                  return;
+                                }
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                                setTempMappingPin({ x, y });
+                              }}
+                              className="relative inline-block max-w-full"
+                            >
+                              <img
+                                src={activeMap.imageUrl}
+                                alt="Indoor floor plan"
+                                className="max-w-full max-h-[400px] object-contain pointer-events-none block"
+                              />
 
-                            {/* Render already saved room pins */}
-                            {plottedRefs.map((ref) => (
-                              <div
-                                key={ref.id}
-                                style={{ left: `${ref.indoorX}%`, top: `${ref.indoorY}%` }}
-                                className="absolute w-3.5 h-3.5 -ml-1.75 -mt-1.75 bg-blue-500 rounded-full border-2 border-white shadow-md flex items-center justify-center pointer-events-none group/pin"
-                                title={ref.nameEn}
-                              >
-                                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover/pin:block bg-slate-950 text-white text-[9px] px-1.5 py-0.5 rounded shadow-lg whitespace-nowrap z-30 font-bold">
-                                  {ref.nameEn}
-                                </span>
-                              </div>
-                            ))}
+                              {/* Render already saved room pins */}
+                              {plottedRefs.map((ref) => (
+                                <div
+                                  key={ref.id}
+                                  style={{ left: `${ref.indoorX}%`, top: `${ref.indoorY}%` }}
+                                  className="absolute w-3.5 h-3.5 -ml-1.75 -mt-1.75 bg-blue-500 rounded-full border-2 border-white shadow-md flex items-center justify-center pointer-events-none group/pin"
+                                  title={ref.nameEn}
+                                >
+                                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover/pin:block bg-slate-950 text-white text-[9px] px-1.5 py-0.5 rounded shadow-lg whitespace-nowrap z-30 font-bold">
+                                    {ref.nameEn}
+                                  </span>
+                                </div>
+                              ))}
 
-                            {/* Render temp selection pin */}
-                            {selectedMappingRefId.startsWith("ref-") && tempMappingPin && (
-                              <div
-                                style={{ left: `${tempMappingPin.x}%`, top: `${tempMappingPin.y}%` }}
-                                className="absolute w-4 h-4 -ml-2 -mt-2 bg-red-500 rounded-full border-2 border-white shadow-xl flex items-center justify-center pointer-events-none animate-pulse z-20"
-                              >
-                                <div className="w-1.5 h-1.5 bg-white rounded-full" />
-                              </div>
-                            )}
+                              {/* Render temp selection pin */}
+                              {selectedMappingRefId.startsWith("ref-") && tempMappingPin && (
+                                <div
+                                  style={{ left: `${tempMappingPin.x}%`, top: `${tempMappingPin.y}%` }}
+                                  className="absolute w-4 h-4 -ml-2 -mt-2 bg-red-500 rounded-full border-2 border-white shadow-xl flex items-center justify-center pointer-events-none animate-pulse z-20"
+                                >
+                                  <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );

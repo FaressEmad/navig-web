@@ -704,68 +704,71 @@ export default function NavigationPageClient({ places, nodes, edges }: Navigatio
 
                     {/* Interactive Click Map */}
                     <div 
-                      onClick={(e) => {
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        const x = ((e.clientX - rect.left) / rect.width) * 100;
-                        const y = ((e.clientY - rect.top) / rect.height) * 100;
-                        setUserIndoorPos({ x, y });
-                      }}
-                      className="relative bg-slate-900 border border-outline-variant/15 rounded-2xl overflow-hidden flex items-center justify-center p-3 cursor-crosshair select-none max-h-[450px]"
+                      className="relative bg-slate-900 border border-outline-variant/15 rounded-2xl overflow-hidden flex items-center justify-center p-3 cursor-crosshair select-none max-h-[450px] w-full"
                     >
-                      <img
-                        src={currentMap.imageUrl}
-                        alt="Floor blueprint plan"
-                        className="max-w-full max-h-[380px] object-contain pointer-events-none"
-                      />
+                      <div
+                        onClick={(e) => {
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const x = ((e.clientX - rect.left) / rect.width) * 100;
+                          const y = ((e.clientY - rect.top) / rect.height) * 100;
+                          setUserIndoorPos({ x, y });
+                        }}
+                        className="relative inline-block max-w-full"
+                      >
+                        <img
+                          src={currentMap.imageUrl}
+                          alt="Floor blueprint plan"
+                          className="max-w-full max-h-[380px] object-contain pointer-events-none block"
+                        />
 
-                      {/* Line connecting user and target (only when correct floor) */}
-                      {userIndoorPos && isCorrectFloor && hasDestinationCoords && (
-                        <>
-                          <style>{`
-                            @keyframes indoorDash {
-                              to {
-                                stroke-dashoffset: -20;
+                        {/* Line connecting user and target (only when correct floor) */}
+                        {userIndoorPos && isCorrectFloor && hasDestinationCoords && (
+                          <>
+                            <style>{`
+                              @keyframes indoorDash {
+                                to {
+                                  stroke-dashoffset: -20;
+                                }
                               }
-                            }
-                          `}</style>
-                          <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
-                            <line
-                              x1={`${userIndoorPos.x}%`}
-                              y1={`${userIndoorPos.y}%`}
-                              x2={`${destinationPlace.indoorX}%`}
-                              y2={`${destinationPlace.indoorY}%`}
-                              stroke="#e51245"
-                              strokeWidth="4.5"
-                              strokeDasharray="6,6"
-                              style={{ animation: 'indoorDash 1s linear infinite' }}
-                            />
-                          </svg>
-                        </>
-                      )}
+                            `}</style>
+                            <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                              <line
+                                x1={`${userIndoorPos.x}%`}
+                                y1={`${userIndoorPos.y}%`}
+                                x2={`${destinationPlace.indoorX}%`}
+                                y2={`${destinationPlace.indoorY}%`}
+                                stroke="#e51245"
+                                strokeWidth="4.5"
+                                strokeDasharray="6,6"
+                                style={{ animation: 'indoorDash 1s linear infinite' }}
+                              />
+                            </svg>
+                          </>
+                        )}
 
-                      {/* User Current Position Pin */}
-                      {userIndoorPos && (
-                        <div
-                          style={{ left: `${userIndoorPos.x}%`, top: `${userIndoorPos.y}%` }}
-                          className="absolute w-4.5 h-4.5 -ml-2.25 -mt-2.25 bg-blue-500 rounded-full border-2 border-white shadow-xl flex items-center justify-center pointer-events-none animate-pulse z-20"
-                        >
-                          <div className="w-1.5 h-1.5 bg-white rounded-full" />
-                        </div>
-                      )}
+                        {/* User Current Position Pin */}
+                        {userIndoorPos && (
+                          <div
+                            style={{ left: `${userIndoorPos.x}%`, top: `${userIndoorPos.y}%` }}
+                            className="absolute w-4.5 h-4.5 -ml-2.25 -mt-2.25 bg-blue-500 rounded-full border-2 border-white shadow-xl flex items-center justify-center pointer-events-none animate-pulse z-20"
+                          >
+                            <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                          </div>
+                        )}
 
-                      {/* Target Destination Pin (only visible on correct floor) */}
-                      {isCorrectFloor && hasDestinationCoords && (
-                        <div
-                          style={{ left: `${destinationPlace.indoorX}%`, top: `${destinationPlace.indoorY}%` }}
-                          className="absolute w-5 h-5 -ml-2.5 -mt-2.5 flex items-center justify-center z-25 group"
-                        >
-                          <MapPin className="w-5 h-5 text-red-500 filter drop-shadow-md animate-bounce" />
-                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded shadow-lg whitespace-nowrap font-black">
-                            {destRoomName}
-                          </span>
-                        </div>
-                      )}
-
+                        {/* Target Destination Pin (only visible on correct floor) */}
+                        {isCorrectFloor && hasDestinationCoords && (
+                          <div
+                            style={{ left: `${destinationPlace.indoorX}%`, top: `${destinationPlace.indoorY}%` }}
+                            className="absolute w-5 h-5 -ml-2.5 -mt-2.5 flex items-center justify-center z-25 group"
+                          >
+                            <MapPin className="w-5 h-5 text-red-500 filter drop-shadow-md animate-bounce" />
+                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded shadow-lg whitespace-nowrap font-black">
+                              {destRoomName}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
