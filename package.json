@@ -12,6 +12,7 @@
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "@turf/turf": "^7.3.5",
+    "@vercel/blob": "^2.6.1",
     "framer-motion": "^12.42.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.23.0",
