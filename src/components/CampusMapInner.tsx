@@ -104,7 +104,8 @@ function MapController() {
       let target = mapCenter;
       let targetZoom = mapZoom;
       if (isNavigating) {
-        target = getOffsetCenter(mapCenter);
+        // Center directly on user location (mapCenter) to act as the rotation pivot point
+        target = mapCenter;
         targetZoom = 20;
       }
 
@@ -123,9 +124,9 @@ function MapController() {
   useEffect(() => {
     if (!map || !(map as any)._loaded || !map.getContainer()) return;
     if (isNavigating && isAutoFollowEnabled && userLocation) {
-      const target = getOffsetCenter(userLocation);
+      // Center directly on userLocation to ensure they stay at the rotation pivot point
       try {
-        map.setView(target, 20, {
+        map.setView(userLocation, 20, {
           animate: true,
           duration: 0.5,
         });
@@ -161,22 +162,7 @@ function MapController() {
     return () => clearTimeout(timer);
   }, [map]);
 
-  // Rotate the map container pane beneath the user's heading (Google/Apple Maps style)
-  useEffect(() => {
-    if (!map || !(map as any)._loaded || !map.getContainer()) return;
-    try {
-      const container = map.getContainer();
-      if (container) {
-        if (isNavigating && isAutoFollowEnabled) {
-          container.style.setProperty("--map-rotation", `${-userHeading}deg`);
-        } else {
-          container.style.setProperty("--map-rotation", "0deg");
-        }
-      }
-    } catch (e) {
-      console.error("Leaflet rotation error:", e);
-    }
-  }, [userHeading, isNavigating, isAutoFollowEnabled, map]);
+  // Map rotation is now handled via GPU-accelerated wrapper div transition on parent
 
   return null;
 }
@@ -267,19 +253,27 @@ export default function CampusMapInner({ places }: CampusMapInnerProps) {
   );
 
   return (
-    <div className="w-full h-full relative">
-      <MapContainer
-        center={[30.0275, 31.2085]}
-        zoom={16}
-        minZoom={14}
-        maxZoom={18}
-        maxBounds={campusBounds}
-        maxBoundsViscosity={1.0}
-        scrollWheelZoom={true}
-        zoomControl={false}
-        className="w-full h-full"
-        style={{ width: "100%", height: "100%" }}
+    <div className="w-full h-full relative overflow-hidden bg-background">
+      <div 
+        className="w-full h-full relative"
+        style={{ 
+          transform: isNavigating && isAutoFollowEnabled ? `rotate(${-userHeading}deg) scale(1.4)` : "rotate(0deg) scale(1)",
+          transformOrigin: "center",
+          transition: "transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+        }}
       >
+        <MapContainer
+          center={[30.0275, 31.2085]}
+          zoom={16}
+          minZoom={14}
+          maxZoom={18}
+          maxBounds={campusBounds}
+          maxBoundsViscosity={1.0}
+          scrollWheelZoom={true}
+          zoomControl={false}
+          className="w-full h-full"
+          style={{ width: "100%", height: "100%" }}
+        >
         <TileLayer
           url={osmUrl}
           attribution={osmAttrib}
@@ -405,5 +399,6 @@ export default function CampusMapInner({ places }: CampusMapInnerProps) {
         )}
       </MapContainer>
     </div>
-  );
+  </div>
+);
 }
