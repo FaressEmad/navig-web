@@ -31,7 +31,9 @@ export default function NavigationPageClient({ places, nodes, edges }: Navigatio
   const { t, language } = useTranslation();
   const { 
     startPlace,
+    setStartPlace,
     destinationPlace, 
+    setDestinationPlace,
     activeRoute, 
     setActiveRoute,
     isNavigating,
@@ -51,6 +53,22 @@ export default function NavigationPageClient({ places, nodes, edges }: Navigatio
     setUserHeading,
     isMapReady
   } = useStore();
+
+  // Sync startPlace and destinationPlace with the latest database records from `places` prop
+  useEffect(() => {
+    if (startPlace) {
+      const freshStart = places.find(p => p.id === startPlace.id);
+      if (freshStart && (freshStart.indoorX !== startPlace.indoorX || freshStart.indoorY !== startPlace.indoorY || freshStart.floor !== startPlace.floor)) {
+        setStartPlace(freshStart);
+      }
+    }
+    if (destinationPlace) {
+      const freshDest = places.find(p => p.id === destinationPlace.id);
+      if (freshDest && (freshDest.indoorX !== destinationPlace.indoorX || freshDest.indoorY !== destinationPlace.indoorY || freshDest.floor !== destinationPlace.floor)) {
+        setDestinationPlace(freshDest);
+      }
+    }
+  }, [places, startPlace, destinationPlace, setStartPlace, setDestinationPlace]);
 
   // Indoor Maps Popup States
   const [showIndoorModal, setShowIndoorModal] = useState(false);

@@ -13,7 +13,8 @@ async function main() {
   console.log("=== REFERENCES IN DATABASE ===");
   for (const ref of references) {
     console.log(`Reference: "${ref.nameEn}" (ID: ${ref.id})`);
-    console.log(`  Coordinates: [${ref.latitude}, ${ref.longitude}]`);
+    console.log(`  GPS Coordinates: [${ref.latitude}, ${ref.longitude}]`);
+    console.log(`  Indoor Coordinates: [X: ${ref.indoorX}, Y: ${ref.indoorY}]`);
     console.log(`  Parent Building: "${ref.building?.nameEn}" (ID: ${ref.buildingId})`);
     console.log(`  Parent Coordinates: [${ref.building?.latitude}, ${ref.building?.longitude}]`);
     console.log(`  Coordinates Match Parent? ${ref.latitude === ref.building?.latitude && ref.longitude === ref.building?.longitude ? "YES" : "NO"}`);
