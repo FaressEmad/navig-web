@@ -34,20 +34,36 @@ export async function POST(request: NextRequest) {
       });
       return NextResponse.json({ url: blob.url }, { status: 200 });
     } else {
-      // Local development fallback: write to public folder if token is not configured locally
-      const { writeFile, mkdir } = await import("fs/promises");
+      // Local development fallback / read-only environment base64 fallback
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      const uploadDir = path.join(process.cwd(), "public", "images", "floors");
-      await mkdir(uploadDir, { recursive: true });
 
-      const localFileName = `floor_${Date.now()}_${baseName}${ext}`;
-      const filePath = path.join(uploadDir, localFileName);
-      await writeFile(filePath, buffer);
+      try {
+        // If VERCEL env is set, local file system is read-only.
+        // Fall back directly to base64 to avoid EROFS error.
+        if (process.env.VERCEL) {
+          throw new Error("Vercel environment detected. Local file system is read-only.");
+        }
 
-      const publicUrl = `/images/floors/${localFileName}`;
-      console.log(`[Upload API] Saved locally (No Vercel token): ${publicUrl}`);
-      return NextResponse.json({ url: publicUrl }, { status: 200 });
+        const { writeFile, mkdir } = await import("fs/promises");
+        const uploadDir = path.join(process.cwd(), "public", "images", "floors");
+        await mkdir(uploadDir, { recursive: true });
+
+        const localFileName = `floor_${Date.now()}_${baseName}${ext}`;
+        const filePath = path.join(uploadDir, localFileName);
+        await writeFile(filePath, buffer);
+
+        const publicUrl = `/images/floors/${localFileName}`;
+        console.log(`[Upload API] Saved locally (No Vercel token): ${publicUrl}`);
+        return NextResponse.json({ url: publicUrl }, { status: 200 });
+      } catch (writeError: any) {
+        console.warn(`[Upload API] Local write failed, falling back to base64 data URI:`, writeError.message);
+        
+        // Convert to base64 data URI
+        const base64Data = buffer.toString("base64");
+        const dataUrl = `data:${file.type};base64,${base64Data}`;
+        return NextResponse.json({ url: dataUrl }, { status: 200 });
+      }
     }
   } catch (error: any) {
     console.error("Upload error:", error);
